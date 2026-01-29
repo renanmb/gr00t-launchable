@@ -42,7 +42,12 @@ log "Installing desktop + base packages"
 apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
   ubuntu-desktop \
-  python3-pip
+  python3-pip \
+  xfce4 \
+  xfce4-goodies \
+  dbus-x11 \
+  x11vnc \
+  expect
 
 ############################
 # AUTO LOGIN CONFIG
@@ -53,6 +58,7 @@ GDM_CONF="/etc/gdm3/custom.conf"
 
 ensure_line_in_file "$GDM_CONF" "AutomaticLoginEnable=true" "\[daemon\]"
 ensure_line_in_file "$GDM_CONF" "AutomaticLogin=${ANSIBLE_USER}" "\[daemon\]"
+ensure_line_in_file "$GDM_CONF" "WaylandEnable=false" "\[daemon\]"
 need_reboot
 
 ############################

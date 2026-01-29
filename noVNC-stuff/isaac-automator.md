@@ -1,7 +1,17 @@
 # Isaac Automator Ansible
 
-Installation process from Isaac Automator
+Notes:
 
+This one works the other attemps fail and the cliboard is not working:
+
+```bash
+setup-novnc.sh
+```
+
+Some exploration witht he font sizes and background might be needed.
+
+
+Installation process from Isaac Automator
 
 It installs the rdesktop requirements and then install IsaacSim and Isaaclab using Docker.
 
@@ -13,8 +23,10 @@ Copy local files to instance:
 scp <local-file-path> <brev-instance-name>:<remote-file-path>
 ```
 
+test-g6e-8xlarge-644c23
+
 ```bash
-scp xorg.conf vdisplay.edid x11vnc-ubuntu.service novnc.service test-g6e-8xlarge-25135e:~
+scp setup-novnc_v2.sh xorg.conf vdisplay.edid x11vnc-ubuntu.service novnc.service test-g6e-8xlarge-644c23:~
 ```
 
 Important note: must disable wayland 
@@ -31,6 +43,16 @@ AutomaticLoginEnable=true
 AutomaticLogin=ubuntu
 ```
 
+## Connect to instance
+
+```bash
+curl ifconfig.me
+```
+54.198.39.94
+
+http://<instance-public-ip>:6080/vnc.html
+
+http://44.204.96.88:6080/vnc.html
 
 ## The entrypoint for rdesktop
 
@@ -1080,7 +1102,7 @@ curl ifconfig.me
 
 http://<instance-public-ip>:6080/vnc.html
 
-http://54.198.39.94:6080/vnc.html
+http://44.204.96.88:6080/vnc.html
 
 ## Add Clipboard Support
 

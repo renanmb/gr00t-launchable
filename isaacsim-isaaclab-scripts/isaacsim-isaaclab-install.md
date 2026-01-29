@@ -1,6 +1,14 @@
 # Installing IsaacSim and IsaacLab
 
+```bash
+exec bash -l
+```
+
 Overall steps to make the script to install IsaacSim and IsaacLab
+
+```bash
+scp install-conda.sh isaaclab_v1.sh isaacsim_v1.sh test-g6e-8xlarge-08106e:~
+```
 
 ```bash
 # chmod a+x script_name.sh # make all executable for all users
@@ -171,6 +179,14 @@ log "Installation complete"
 
 ```
 
+**Third attempt**
+
+Conda is being installed at the wrong place and with the wrong user and credentials:
+
+```bash
+sudo /opt/conda/bin/conda --version
+```
+
 
 ## Isaac Sim
 
@@ -212,6 +228,45 @@ echo "Running post-install..."
 
 echo "Isaac Sim installation complete ✅"
 ```
+
+### Issues installing IsaacSim
+
+**Solution 1** --- Best practice, Install and run Isaac Sim as a non-root user, e.g. ubuntu.
+
+```bash
+sudo mv /root/isaacsim /home/ubuntu/isaacsim
+sudo chown -R ubuntu:ubuntu /home/ubuntu/isaacsim
+```
+
+Then log into noVNC as ubuntu and run:
+
+```bash
+cd ~/isaacsim
+./isaac-sim.sh
+```
+
+This avoids GPU, X11, Wayland, and file permission issues long-term.
+
+**Solution 2** --- Allow GUI user to access /root
+
+```bash
+sudo chmod o+rx /root
+sudo chmod -R o+rx /root/isaacsim
+```
+
+This is bad but works
+
+**Solution 3** --- Install it properly with the correct user
+
+need to check which user and install it there
+
+```bash
+sudo -u ubuntu bash
+cd ~
+```
+
+Implemented solution 3 in the isaacsim_v2.sh
+
 
 ## IsaacLab
 
@@ -350,3 +405,59 @@ Run inference:
 ```bash
 isaaclab -p scripts/reinforcement_learning/rsl_rl/play.py --task=Isaac-Velocity-Rough-Anymal-C-v0 --num_envs 32
 ```
+
+
+REplacing
+
+```bash
+# -----------------------------------------------------------------------------
+# Install Isaac Lab extensions (editable pip)
+# -----------------------------------------------------------------------------
+echo "▶ Installing Isaac Lab Python extensions"
+
+sudo -u "$TARGET_USER" bash <<EOF
+set -euo pipefail
+
+# Load conda correctly (DO NOT source .bashrc)
+source /opt/conda/etc/profile.d/conda.sh
+
+source "\$HOME/.bashrc"
+conda activate "$CONDA_ENV_NAME"
+
+cd "$ISAACLAB_DIR"
+./isaaclab.sh --install
+EOF
+```
+
+with
+
+```bash
+sudo -u "$TARGET_USER" bash <<EOF
+set -euo pipefail
+
+# Load conda correctly (DO NOT source .bashrc)
+source /opt/conda/etc/profile.d/conda.sh
+
+cd "$ISAACLAB_DIR"
+
+# ---------------------------------------------------------------------------
+# Ensure conda environment exists
+# ---------------------------------------------------------------------------
+if ! conda env list | awk '{print \$1}' | grep -qx "isaaclab"; then
+  echo "▶ Creating conda environment 'isaaclab'"
+  ./isaaclab.sh --conda isaaclab
+else
+  echo "▶ Conda environment 'isaaclab' already exists"
+fi
+
+# ---------------------------------------------------------------------------
+# Activate env and install Isaac Lab extensions
+# ---------------------------------------------------------------------------
+echo "▶ Activating conda environment"
+conda activate isaaclab
+
+echo "▶ Installing Isaac Lab dependencies into conda env"
+isaaclab -i
+EOF
+```
+
