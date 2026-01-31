@@ -11,4 +11,4 @@ curl ifconfig.me
 
 http://<instance-public-ip>:6080/vnc.html
 
-http://34.228.239.212:6080/vnc.html
+http://3.85.79.50:6080/vnc.html
