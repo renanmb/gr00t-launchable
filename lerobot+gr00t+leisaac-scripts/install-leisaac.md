@@ -158,6 +158,15 @@ flash-attn = ["torch==2.7.0", "numpy==1.26.4"]
 pip install albumentations==1.4.18 av==15.0.0 diffusers==0.35.1 dm-tree==0.1.8 lmdb==1.7.5 msgpack==1.1.0 msgpack-numpy==0.4.8 pandas==2.2.3 peft==0.17.1 termcolor==3.2.0 torch==2.7.0 torchvision==0.22.0 transformers==4.51.3 tyro==0.9.17 click==8.1.8 datasets==3.6.0 einops==0.8.1 gymnasium==1.2.2 matplotlib==3.10.1 numpy==1.26.4 omegaconf==2.3.0 scipy==1.15.3 torchcodec==0.4.0 wandb==0.23.0 pyzmq==27.0.1 deepspeed==0.17.6
 ```
 
+The gr00t 0.1.0 requires tranformers == 4.53.0
+
+what if install the latest of everything ???
+
+```bash
+pip install albumentations av diffusers dm-tree lmdb msgpack msgpack-numpy pandas peft termcolor torch torchvision transformers tyro click datasets einops gymnasium matplotlib numpy omegaconf scipy torchcodec wandb pyzmq deepspeed
+```
+
+
 **Attention**: This command takes too long and causes CPU to run at 100%
 
 ```bash
@@ -169,6 +178,17 @@ After running that single pip install line, this seems to work best to install f
 ```bash
 pip install -e . --no-build-isolation
 ```
+
+Debugging the transformers
+
+```bash
+python - << 'EOF'
+import transformers
+print(transformers.__version__)
+print(transformers.__file__)
+EOF
+```
+
 
 **Install Errors** --- Issue with flash attention
 
