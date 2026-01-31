@@ -1,11 +1,34 @@
 # Install LeIsaac+Lerobot+gr00t
 
+Installing LeIsaac and Lerobot and gr00t have some conflicting dependencies.
 
+remember to connect to the VM GUI
+
+```bash
+curl ifconfig.me
+```
+
+Example
+
+54.198.207.114
+
+http://<instance-public-ip>:6080/vnc.html
+
+http://54.198.207.114:6080/vnc.html
+
+
+## Install Hugginface CLI
+
+```bash
+curl -LsSf https://hf.co/cli/install.sh | bash
+```
+
+Review: make sure the installed CLI is acessible by all users.
 
 
 ## Install lerobot+gr00t
 
-Step 1: Install the dependencies lerobot
+**Step 1**: Install the dependencies lerobot
 
 The gr00t project depends on the lerobot project
 
@@ -21,6 +44,8 @@ conda create -y -n lerobot python=3.10
 conda activate lerobot
 ```
 
+This step will ask for additional install of dependencies
+
 ```bash
 conda install ffmpeg
 ```
@@ -29,13 +54,66 @@ conda install ffmpeg
 pip install --no-binary=av -e .
 ```
 
+This has an error because missing several packages
+
+```bash
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... error
+  error: subprocess-exited-with-error
+  
+  × Getting requirements to build wheel did not run successfully.
+  │ exit code: 1
+  ╰─> [29 lines of output]
+      Package libavformat was not found in the pkg-config search path.
+      Perhaps you should add the directory containing `libavformat.pc'
+      to the PKG_CONFIG_PATH environment variable
+      No package 'libavformat' found
+      Package libavcodec was not found in the pkg-config search path.
+      Perhaps you should add the directory containing `libavcodec.pc'
+      to the PKG_CONFIG_PATH environment variable
+      No package 'libavcodec' found
+      Package libavdevice was not found in the pkg-config search path.
+      Perhaps you should add the directory containing `libavdevice.pc'
+      to the PKG_CONFIG_PATH environment variable
+      No package 'libavdevice' found
+      Package libavutil was not found in the pkg-config search path.
+      Perhaps you should add the directory containing `libavutil.pc'
+      to the PKG_CONFIG_PATH environment variable
+      No package 'libavutil' found
+      Package libavfilter was not found in the pkg-config search path.
+      Perhaps you should add the directory containing `libavfilter.pc'
+      to the PKG_CONFIG_PATH environment variable
+      No package 'libavfilter' found
+      Package libswscale was not found in the pkg-config search path.
+      Perhaps you should add the directory containing `libswscale.pc'
+      to the PKG_CONFIG_PATH environment variable
+      No package 'libswscale' found
+      Package libswresample was not found in the pkg-config search path.
+      Perhaps you should add the directory containing `libswresample.pc'
+      to the PKG_CONFIG_PATH environment variable
+      No package 'libswresample' found
+      pkg-config could not find libraries ['avformat', 'avcodec', 'avdevice', 'avutil', 'avfilter', 'swscale', 'swresample']
+      [end of output]
+  
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+ERROR: Failed to build 'av' when getting requirements to build wheel
+```
+
 NOTE: If you encounter build errors, you may need to install additional dependencies (cmake, build-essential, and ffmpeg libs). On Linux, run:
 
 ```bash
-sudo apt-get install cmake build-essential python-dev pkg-config libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswscale-dev libswresample-dev libavfilter-dev pkg-config
+sudo apt install cmake build-essential python-dev pkg-config libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswscale-dev libswresample-dev libavfilter-dev pkg-config
 ```
 
-Step 2: install gr00t
+Error Messages
+
+Error: Package 'python-dev' has no installation candidate
+
+```bash
+sudo apt install -y cmake build-essential pkg-config libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswscale-dev libswresample-dev libavfilter-dev pkg-config
+```
+
+**Step 2**: install gr00t
 
 ```bash
 cd ~
@@ -45,13 +123,91 @@ cd Isaac-GR00T
 
 **TODO** need to perform changes
 
+make sure to be outside the other conda environment
+
 ```bash
+conda deactivate
 conda create -n gr00t python=3.10
 conda activate gr00t
 pip install --upgrade setuptools
 pip install -e .[base]
 pip install --no-build-isolation flash-attn==2.7.1.post4
 ```
+
+need to check the issue with flash attention and build isolation
+
+Also [base] seems not sufficient
+
+```bash
+pip install --no-build-isolation flash-attn==2.7.1.post4
+pip install -e . --no-build-isolation
+```
+
+```bash
+pip install psutil
+pip install flash_attn --no-build-isolation
+```
+
+Maybe need to install these first:
+
+flash-attn = ["torch==2.7.0", "numpy==1.26.4"]
+
+## This works to install gr00t
+
+```bash
+pip install albumentations==1.4.18 av==15.0.0 diffusers==0.35.1 dm-tree==0.1.8 lmdb==1.7.5 msgpack==1.1.0 msgpack-numpy==0.4.8 pandas==2.2.3 peft==0.17.1 termcolor==3.2.0 torch==2.7.0 torchvision==0.22.0 transformers==4.51.3 tyro==0.9.17 click==8.1.8 datasets==3.6.0 einops==0.8.1 gymnasium==1.2.2 matplotlib==3.10.1 numpy==1.26.4 omegaconf==2.3.0 scipy==1.15.3 torchcodec==0.4.0 wandb==0.23.0 pyzmq==27.0.1 deepspeed==0.17.6
+```
+
+**Attention**: This command takes too long and causes CPU to run at 100%
+
+```bash
+pip install flash-attn==2.7.1.post4 --no-build-isolation 
+```
+
+After running that single pip install line, this seems to work best to install flash-attn:
+
+```bash
+pip install -e . --no-build-isolation
+```
+
+**Install Errors** --- Issue with flash attention
+
+```bash
+  error: subprocess-exited-with-error
+  
+  × Preparing metadata (pyproject.toml) did not run successfully.
+  │ exit code: 1
+  ╰─> [17 lines of output]
+      /home/ubuntu/.conda/envs/gr00t/lib/python3.10/site-packages/wheel/bdist_wheel.py:4: FutureWarning: The 'wheel' package is no longer the canonical location of the 'bdist_wheel' command, and will be removed in a future release. Please update to setuptools v70.1 or later which contains an integrated version of this command.
+        warn(
+      Traceback (most recent call last):
+        File "/home/ubuntu/.conda/envs/gr00t/lib/python3.10/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 389, in <module>
+          main()
+        File "/home/ubuntu/.conda/envs/gr00t/lib/python3.10/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 373, in main
+          json_out["return_val"] = hook(**hook_input["kwargs"])
+        File "/home/ubuntu/.conda/envs/gr00t/lib/python3.10/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 175, in prepare_metadata_for_build_wheel
+          return hook(metadata_directory, config_settings)
+        File "/home/ubuntu/.conda/envs/gr00t/lib/python3.10/site-packages/setuptools/build_meta.py", line 378, in prepare_metadata_for_build_wheel
+          self.run_setup()
+        File "/home/ubuntu/.conda/envs/gr00t/lib/python3.10/site-packages/setuptools/build_meta.py", line 518, in run_setup
+          super().run_setup(setup_script=setup_script)
+        File "/home/ubuntu/.conda/envs/gr00t/lib/python3.10/site-packages/setuptools/build_meta.py", line 317, in run_setup
+          exec(code, locals())
+        File "<string>", line 22, in <module>
+      ModuleNotFoundError: No module named 'torch'
+      [end of output]
+  
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+error: metadata-generation-failed
+
+× Encountered error while generating package metadata.
+╰─> flash-attn
+
+note: This is an issue with the package mentioned above, not pip.
+hint: See above for details.
+```
+
+
 
 Important Configuration for Single GPU
 
@@ -64,6 +220,147 @@ import torch.distributed as dist
 if dist.is_available() and dist.is_initialized():
 dist.barrier()
 ```
+
+### gr00t Python dependencies
+
+All the dependecies gr00t pyproject.toml
+
+
+```toml
+#This is the single project pyproject.toml
+
+[build-system]
+requires = ["setuptools>=67", "wheel", "pip"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gr00t"
+version = "0.1.0"
+requires-python = "==3.10.*"
+# Mirror the main repo's baseline dependencies so install behaves the same.
+dependencies = [
+    "albumentations==1.4.18",
+    "av==15.0.0",
+    "diffusers==0.35.1",
+    "dm-tree==0.1.8",
+    "lmdb==1.7.5",
+    "msgpack==1.1.0",
+    "msgpack-numpy==0.4.8",
+    "pandas==2.2.3",
+    "peft==0.17.1",
+    "termcolor==3.2.0",
+    "torch==2.7.0",
+    "torchvision==0.22.0",
+    "transformers==4.51.3",
+    "tyro==0.9.17",
+    "flash-attn==2.7.4.post1",
+    "click==8.1.8",
+    "datasets==3.6.0",
+    "einops==0.8.1",
+    "gymnasium==1.2.2",
+    "matplotlib==3.10.1",
+    "numpy==1.26.4",
+    "omegaconf==2.3.0",
+    "scipy==1.15.3",
+    "torchcodec==0.4.0",
+    "wandb==0.23.0",
+    "pyzmq==27.0.1",
+    "deepspeed==0.17.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "ipython",
+]
+tensorrt = [
+    "onnx>=1.20.0",
+    "tensorrt>=10.14.1.48.post1",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["gr00t*"]
+
+[tool.uv.extra-build-dependencies]
+flash-attn = ["torch==2.7.0", "numpy==1.26.4"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["gr00t"]
+exclude = [
+    "__pycache__",
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".vscode",
+    ".venv",
+    "dist",
+    "logs",
+    "*.ipynb",
+    "gr00t/model/modules/nvidia/Eagle-Block2A-2B-v2",
+    "external_dependencies",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+case-sensitive = false
+combine-as-imports = true
+force-sort-within-sections = true
+force-wrap-aliases = false
+split-on-trailing-comma = false
+lines-after-imports = 2
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+```
+
+All dependencies I wanna
+
+```txt
+dependencies = [
+    "albumentations==1.4.18",
+    "av==15.0.0",
+    "diffusers==0.35.1",
+    "dm-tree==0.1.8",
+    "lmdb==1.7.5",
+    "msgpack==1.1.0",
+    "msgpack-numpy==0.4.8",
+    "pandas==2.2.3",
+    "peft==0.17.1",
+    "termcolor==3.2.0",
+    "torch==2.7.0",
+    "torchvision==0.22.0",
+    "transformers==4.51.3",
+    "tyro==0.9.17",
+    "flash-attn==2.7.4.post1",
+    "click==8.1.8",
+    "datasets==3.6.0",
+    "einops==0.8.1",
+    "gymnasium==1.2.2",
+    "matplotlib==3.10.1",
+    "numpy==1.26.4",
+    "omegaconf==2.3.0",
+    "scipy==1.15.3",
+    "torchcodec==0.4.0",
+    "wandb==0.23.0",
+    "pyzmq==27.0.1",
+    "deepspeed==0.17.6",
+    "flash-attn==2.7.1.post4",
+]
+flash-attn = ["torch==2.7.0", "numpy==1.26.4"]
+```
+
 
 ## Install LeIsaac
 
@@ -179,9 +476,14 @@ hf download --repo-type dataset izuluaga/finish_sandwich --local-dir ./demo_data
 hf download --repo-type dataset LightwheelAI/leisaac-pick-orange --local-dir ./demo_data/leisaac-pick-orange
 ```
 
+The modality.json needs some work:
+
 ```bash
+# table cleanup
 cp getting_started/examples/so100_dualcam__modality.json ./demo_data/so101-table-cleanup/meta/modality.json
+# example
 cp getting_started/examples/so100__modality.json ./demo_data/<DATASET_PATH>/meta/modality.json
+# finish sandwich
 cp examples/SO100/modality.json examples/SO100/finish_sandwich_lerobot/izuluaga/finish_sandwich/meta/modality.json
 ```
 
@@ -265,3 +567,14 @@ python scripts/inference_service.py --server --model_path ./so101-checkpoints --
 python getting_started/examples/eval_lerobot.py --robot.type=so100_follower --robot.port=/dev/ttyACM0 --robot.id=my_awesome_follower_arm --robot.cameras="{ wrist: {type: opencv, index_or_path: 9, width: 640, height: 480, fps: 30}, front: {type: opencv, index_or_path: 15, width: 640, height: 480, fps: 30}}" --policy_host=10.112.209.136 --lang_instruction="Grab pens and place into pen holder."
 ```
 
+# Putting it all together
+
+```bash
+# Install Huggingface CLI
+curl -LsSf https://hf.co/cli/install.sh | bash
+
+cd ~
+git clone https://github.com/huggingface/lerobot.git
+cd lerobot
+
+```
