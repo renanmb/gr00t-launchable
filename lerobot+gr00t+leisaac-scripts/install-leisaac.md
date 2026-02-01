@@ -559,6 +559,10 @@ Once the training is complete and your fine-tuned policy is generated, you can v
 python gr00t/eval/open_loop_eval.py --dataset-path examples/SO100/finish_sandwich_lerobot/izuluaga/finish_sandwich --embodiment-tag NEW_EMBODIMENT --model-path /tmp/so100_finetune/checkpoint-10000 --traj-ids 0 --action-horizon 16 --steps 400
 ```
 
+```bash
+python gr00t/eval/open_loop_eval.py --dataset-path demo_data/leisaac-pick-orange --embodiment-tag NEW_EMBODIMENT --model-path /tmp/so100_finetune/checkpoint-10000 --traj-ids 0 --action-horizon 16 --steps 400
+```
+
 Congratulations! You have successfully finetuned GR00T-N1.6 on a new embodiment.
 
 Plot and save trajectory results comparing ground truth and predicted actions.
