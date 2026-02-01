@@ -163,7 +163,7 @@ The gr00t 0.1.0 requires tranformers == 4.53.0
 what if install the latest of everything ???
 
 ```bash
-pip install albumentations av diffusers dm-tree lmdb msgpack msgpack-numpy pandas peft termcolor torch torchvision transformers tyro click datasets einops gymnasium matplotlib numpy omegaconf scipy torchcodec wandb pyzmq deepspeed
+pip install albumentations av diffusers dm-tree lmdb msgpack msgpack-numpy pandas peft termcolor torch torchvision transformers==4.51.3 tyro click datasets einops gymnasium matplotlib numpy omegaconf scipy torchcodec wandb pyzmq deepspeed
 ```
 
 **VERY IMPORTANT** --- transformers version
@@ -601,12 +601,205 @@ python getting_started/examples/eval_lerobot.py --robot.type=so100_follower --ro
 
 # Putting it all together
 
+Steps to install Huggingface CLI + lerobot + GR00T + leisaac, altogether just need to build a script that retains state and verify each step.
+
 ```bash
 # Install Huggingface CLI
 curl -LsSf https://hf.co/cli/install.sh | bash
-
+# Install LeRobot
 cd ~
 git clone https://github.com/huggingface/lerobot.git
 cd lerobot
 
+conda create -y -n lerobot python=3.10
+conda activate lerobot
+
+conda install ffmpeg
+
+pip install --no-binary=av -e .
+
+sudo apt install -y cmake build-essential pkg-config libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswscale-dev libswresample-dev libavfilter-dev pkg-config
+
+# Install GR00T
+cd ~
+git clone https://github.com/NVIDIA/Isaac-GR00T
+cd Isaac-GR00T
+
+conda deactivate
+conda create -n gr00t python=3.10
+conda activate gr00t
+pip install --upgrade setuptools
+
+pip install psutil
+# Install dependencies transformers==4.51.3
+pip install albumentations av diffusers dm-tree lmdb msgpack msgpack-numpy pandas peft termcolor torch torchvision transformers==4.51.3 tyro click datasets einops gymnasium matplotlib numpy omegaconf scipy torchcodec wandb pyzmq deepspeed
+# Install Flash Attention
+pip install flash_attn --no-build-isolation
+# Run this if necessary
+pip install -e . --no-build-isolation
+# Make sure to deactivate
+conda deactivate
+# Make sure to be on home directory
+cd ~
+
+# Install leisaac
+# Create and activate environment
+conda create -n leisaac python=3.10
+conda activate leisaac
+# Install cuda-toolkit
+conda install -c "nvidia/label/cuda-11.8.0" cuda-toolkit
+# Install PyTorch
+pip install torch==2.5.1 torchvision==0.20.1 --index-url https://download.pytorch.org/whl/cu118
+
+cd ~
+git clone https://github.com/LightwheelAI/leisaac.git
+cd leisaac
+
+pip install -e source/leisaac
+pip install pynput pyserial deepdiff feetech-servo-sdk
+```
+
+
+
+# gr00t Issues and solutions
+
+As mentined in the github issue:
+
+- [maybe not bump transformers from 4.51.3 to 4.53.0 #513](https://github.com/NVIDIA/Isaac-GR00T/issues/513)
+
+THere are some library issues and dependencies. 
+
+I set up the environment for the model server but failed to make it run with following error:
+
+```python
+from transformers.image_utils import ImageInput, VideoInput, get_image_size, to_numpy_array ImportError: cannot import name 'VideoInput' from 'transformers.image_utils' (/home/hc81/Isaac-GR00T/.venv/lib/python3.10/site-packages/transformers/image_utils.py)
+```
+
+but after i reset it back to 4.51.3, everything just work out fine.
+
+Below is a detailed list of all packages and Versions that work as of 01/31/2026
+
+```txt
+Python 3.10.19
+accelerate==1.12.0
+aiohappyeyeballs==2.6.1
+aiohttp==3.13.3
+aiosignal==1.4.0
+albucore==0.0.17
+albumentations==1.4.18
+annotated-types==0.7.0
+antlr4-python3-runtime==4.9.3
+async-timeout==5.0.1
+attrs==25.4.0
+av==15.0.0
+certifi==2026.1.4
+charset-normalizer==3.4.4
+click==8.1.8
+cloudpickle==3.1.2
+contourpy==1.3.2
+cycler==0.12.1
+datasets==3.6.0
+deepspeed==0.17.6
+diffusers==0.35.1
+dill==0.3.8
+dm-tree==0.1.8
+docstring_parser==0.17.0
+einops==0.8.1
+eval_type_backport==0.3.1
+Farama-Notifications==0.0.4
+filelock==3.20.3
+flash_attn==2.7.4.post1
+fonttools==4.61.1
+frozenlist==1.8.0
+fsspec==2026.1.0
+gitdb==4.0.12
+GitPython==3.1.46
+-e git+https://github.com/NVIDIA/Isaac-GR00T@d331b68ee8603be3f07167826d944f458d15a691#egg=gr00t
+gymnasium==1.2.2
+hf-xet==1.2.0
+hjson==3.1.0
+huggingface-hub==0.36.0
+idna==3.11
+ImageIO==2.37.2
+importlib_metadata==8.7.1
+Jinja2==3.1.6
+kiwisolver==1.4.9
+lazy_loader==0.4
+lmdb==1.7.5
+markdown-it-py==4.0.0
+MarkupSafe==3.0.3
+matplotlib==3.10.1
+mdurl==0.1.2
+mpmath==1.3.0
+msgpack==1.1.0
+msgpack-numpy==0.4.8
+multidict==6.7.0
+multiprocess==0.70.16
+networkx==3.4.2
+ninja==1.13.0
+numpy==2.2.6
+nvidia-cublas-cu12==12.6.4.1
+nvidia-cuda-cupti-cu12==12.6.80
+nvidia-cuda-nvrtc-cu12==12.6.77
+nvidia-cuda-runtime-cu12==12.6.77
+nvidia-cudnn-cu12==9.5.1.17
+nvidia-cufft-cu12==11.3.0.4
+nvidia-cufile-cu12==1.11.1.6
+nvidia-curand-cu12==10.3.7.77
+nvidia-cusolver-cu12==11.7.1.2
+nvidia-cusparse-cu12==12.5.4.2
+nvidia-cusparselt-cu12==0.6.3
+nvidia-nccl-cu12==2.26.2
+nvidia-nvjitlink-cu12==12.6.85
+nvidia-nvtx-cu12==12.6.77
+omegaconf==2.3.0
+opencv-python-headless==4.11.0.86
+packaging==26.0
+pandas==2.2.3
+peft==0.17.1
+pillow==12.1.0
+platformdirs==4.5.1
+propcache==0.4.1
+protobuf==6.33.4
+psutil==7.2.1
+py-cpuinfo==9.0.0
+pyarrow==23.0.0
+pydantic==2.12.5
+pydantic_core==2.41.5
+Pygments==2.19.2
+pyparsing==3.3.2
+python-dateutil==2.9.0.post0
+pytz==2025.2
+PyYAML==6.0.3
+pyzmq==27.0.1
+regex==2026.1.15
+requests==2.32.5
+rich==14.2.0
+safetensors==0.7.0
+scikit-image==0.25.2
+scipy==1.15.3
+sentry-sdk==2.50.0
+shtab==1.8.0
+six==1.17.0
+smmap==5.0.2
+sympy==1.14.0
+termcolor==3.2.0
+tifffile==2025.5.10
+tokenizers==0.21.4
+torch==2.7.0
+torchcodec==0.4.0
+torchvision==0.22.0
+tqdm==4.67.1
+transformers==4.51.3
+triton==3.3.0
+typeguard==4.4.4
+typing-inspection==0.4.2
+typing_extensions==4.15.0
+tyro==0.9.17
+tzdata==2025.3
+urllib3==2.6.3
+wandb==0.23.0
+xxhash==3.6.0
+yarl==1.22.0
+zipp==3.23.0
 ```
