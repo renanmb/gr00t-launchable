@@ -231,8 +231,6 @@ note: This is an issue with the package mentioned above, not pip.
 hint: See above for details.
 ```
 
-
-
 Important Configuration for Single GPU
 
 If you're using a single GPU for fine-tuning, you need to modify /Isaac-GR00T/gr00t/data/dataset/factory.py 
@@ -423,7 +421,7 @@ pip install -e source/leisaac
 pip install pynput pyserial deepdiff feetech-servo-sdk
 ```
 
-# LeIsaac
+# How to use LeIsaac
 
 It has implementation to collect the dataset in te HDF5 format.
 
@@ -433,7 +431,7 @@ Using the LeIsaac, the idea is to collect the dataset using teleoperation using 
 
 Connect the SO-ARM101 leader to an Ubuntu computer via USB cable, then use commands to grant serial port permissions.
 
-**TODO** need review
+**TODO** need review, might need a tunnel or a further solution to properly connect devices. Latency and data structure very important
 
 ```bash
 ls /dev/ttyACM*

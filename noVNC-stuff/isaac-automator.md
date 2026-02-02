@@ -26,7 +26,7 @@ scp <local-file-path> <brev-instance-name>:<remote-file-path>
 test-g6e-8xlarge-644c23
 
 ```bash
-scp setup-novnc_v2.sh xorg.conf vdisplay.edid x11vnc-ubuntu.service novnc.service test-g6e-8xlarge-644c23:~
+scp setup-novnc_v2.sh xorg.conf vdisplay.edid x11vnc-ubuntu.service novnc.service test-g6e-8xlarge-a5b412:~
 ```
 
 Important note: must disable wayland 
