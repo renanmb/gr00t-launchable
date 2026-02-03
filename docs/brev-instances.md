@@ -8,6 +8,23 @@ L40S
 - g6e.24xlarge
 - g6e.48xlarge
 
+## NEBIUS
+L40S
+
+NO GO -- NEBIUS does not support
+
+- gpu-l40s-a.1gpu-32vcpu-128gb
+
+Nebius issues:
+
+```bash
+The following packages have unmet dependencies:
+ xfce4-sensors-plugin : Depends: libxnvctrl0 but it is not installable
+E: Unable to correct problems, you have held broken packages.
+```
+
+There is a possibility the NEBIUS provider does not support GUI or the installation requirements for running.
+
 
 ## GCP
 H100

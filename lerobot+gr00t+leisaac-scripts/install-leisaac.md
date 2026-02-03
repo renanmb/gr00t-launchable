@@ -507,6 +507,8 @@ cp getting_started/examples/so100_dualcam__modality.json ./demo_data/so101-table
 cp getting_started/examples/so100__modality.json ./demo_data/<DATASET_PATH>/meta/modality.json
 # finish sandwich
 cp examples/SO100/modality.json examples/SO100/finish_sandwich_lerobot/izuluaga/finish_sandwich/meta/modality.json
+# orange
+cp examples/SO100/modality.json ./demo_data/leisaac-pick-orange/meta/modality.json
 ```
 
 ## LeRobot data conversion
@@ -602,6 +604,8 @@ python getting_started/examples/eval_lerobot.py --robot.type=so100_follower --ro
 Steps to install Huggingface CLI + lerobot + GR00T + leisaac, altogether just need to build a script that retains state and verify each step.
 
 ```bash
+# Make sure it is outisde any conda env
+conda deactivate
 # Install Huggingface CLI
 curl -LsSf https://hf.co/cli/install.sh | bash
 # Install LeRobot
@@ -614,7 +618,7 @@ conda activate lerobot
 
 conda install ffmpeg
 
-pip install --no-binary=av -e .
+pip install --no-binary= av -e .
 
 sudo apt install -y cmake build-essential pkg-config libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswscale-dev libswresample-dev libavfilter-dev pkg-config
 
@@ -631,8 +635,15 @@ pip install --upgrade setuptools
 pip install psutil
 # Install dependencies transformers==4.51.3
 pip install albumentations av diffusers dm-tree lmdb msgpack msgpack-numpy pandas peft termcolor torch torchvision transformers==4.51.3 tyro click datasets einops gymnasium matplotlib numpy omegaconf scipy torchcodec wandb pyzmq deepspeed
-# Install Flash Attention
+
+# Need review -- flash_attn giving issues
+# It takes too long to compile flash attention
+# Install Flash Attention limited parallel jobs
+MAX_JOBS=4 pip install flash_attn --no-build-isolation
+
+# Install Flash Attention 
 pip install flash_attn --no-build-isolation
+
 # Run this if necessary
 pip install -e . --no-build-isolation
 # Make sure to deactivate

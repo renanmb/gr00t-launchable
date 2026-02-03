@@ -17,7 +17,7 @@ curl ifconfig.me
 
 http://<instance-public-ip>:6080/vnc.html
 
-http://34.235.131.168:6080/vnc.html
+http://18.215.232.45:6080/vnc.html
 
 ## Step-1 --- configure the machine VNC + noVNC + base dependencies
 
@@ -26,7 +26,7 @@ setup-novnc.bash
 Must add to the script, make sure the files are copied or exist on the target machine
 
 ```bash
-scp setup-novnc.sh xorg.conf vdisplay.edid x11vnc-ubuntu.service novnc.service test-g6e-8xlarge-a5b412:~
+scp setup-novnc.sh xorg.conf vdisplay.edid x11vnc-ubuntu.service novnc.service test-g6e-8xlarge-3dfe06:~
 ```
 
 Make sure it is executable
@@ -45,7 +45,7 @@ isaacsim_v2.sh
 isaaclab_v2.sh
 
 ```bash
-scp install-conda_v2.sh isaacsim_v2.sh isaaclab_v2.sh test-g6e-8xlarge-a5b412:~
+scp install-conda_v2.sh isaacsim_v2.sh isaaclab_v2.sh test-g6e-8xlarge-3dfe06:~
 ```
 
 Make sure it is executable
@@ -60,3 +60,71 @@ The script ```isaaclab_v2.sh``` needs change to run ```isaaclab -i``` so it fini
 
 ## Step-3 --- Install Lerobot + GR00T + Leisaac
 
+Current Issues:
+
+-- flash_attn
+
+```bash
+# Make sure it is outisde any conda env
+conda deactivate
+# Install Huggingface CLI
+curl -LsSf https://hf.co/cli/install.sh | bash
+# Install LeRobot
+cd ~
+git clone https://github.com/huggingface/lerobot.git
+cd lerobot
+
+conda create -y -n lerobot python=3.10
+conda activate lerobot
+
+conda install ffmpeg
+
+pip install --no-binary= av -e .
+
+sudo apt install -y cmake build-essential pkg-config libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswscale-dev libswresample-dev libavfilter-dev pkg-config
+
+# Install GR00T
+cd ~
+git clone https://github.com/NVIDIA/Isaac-GR00T
+cd Isaac-GR00T
+
+conda deactivate
+conda create -n gr00t python=3.10
+conda activate gr00t
+pip install --upgrade setuptools
+
+pip install psutil
+# Install dependencies transformers==4.51.3
+pip install albumentations av diffusers dm-tree lmdb msgpack msgpack-numpy pandas peft termcolor torch torchvision transformers==4.51.3 tyro click datasets einops gymnasium matplotlib numpy omegaconf scipy torchcodec wandb pyzmq deepspeed
+
+# Need review -- flash_attn giving issues
+# It takes too long to compile flash attention
+# Install Flash Attention limited parallel jobs
+MAX_JOBS=4 pip install flash_attn --no-build-isolation
+
+# Install Flash Attention 
+pip install flash_attn --no-build-isolation
+
+# Run this if necessary
+pip install -e . --no-build-isolation
+# Make sure to deactivate
+conda deactivate
+# Make sure to be on home directory
+cd ~
+
+# Install leisaac
+# Create and activate environment
+conda create -n leisaac python=3.10
+conda activate leisaac
+# Install cuda-toolkit
+conda install -c "nvidia/label/cuda-11.8.0" cuda-toolkit
+# Install PyTorch
+pip install torch==2.5.1 torchvision==0.20.1 --index-url https://download.pytorch.org/whl/cu118
+
+cd ~
+git clone https://github.com/LightwheelAI/leisaac.git
+cd leisaac
+
+pip install -e source/leisaac
+pip install pynput pyserial deepdiff feetech-servo-sdk
+```
