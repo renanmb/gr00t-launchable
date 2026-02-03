@@ -23,6 +23,19 @@ There are several issue when compiling and installing flash_attn with current ch
 nvidia-smi --query-gpu=compute_cap --format=csv
 ```
 
+FAscinating enough the L40S has compute_cap 8.9
+
+```txt
+PyTorch version: 2.7.0+cu126
+CUDA Available: True
+CUDA Version (torch): 12.6
+GPU Index: 0
+GPU Name: NVIDIA L40S
+Compute Capability: 8.9
+Total VRAM: 44.39 GB
+Architecture: Ada
+```
+
 ```bash
 (gr00t) ubuntu@brev-48mf8ilk:~/Isaac-GR00T$ python -c "import flash_attn; print(f'Flash Attention version: {flash_attn.__version__}')"
 Traceback (most recent call last):
@@ -125,4 +138,46 @@ Then compile the code:
 
 ```bash
 nvcc -O2 gpu_arch.cu -o gpu_arch
+```
+
+
+## Dependencies Experiments
+
+The dependencies are finnick so need to experiment to what is going to work for the L40S
+
+Create the conda env from the environment.yml
+
+```bash
+conda env create -f environment.yml
+```
+
+
+```bash
+conda env update -n gr00t --file environment.yml
+```
+
+
+## Error track
+
+```bash
+The conflict is caused by:
+    The user requested wandb==0.21.4
+    lerobot 0.4.3 depends on wandb<0.25.0 and >=0.24.0
+
+Additionally, some packages in these conflicts have no matching distributions available for your environment:
+    wandb
+
+To fix this you could try to:
+1. loosen the range of package versions you've specified
+2. remove package versions to allow pip to attempt to solve the dependency conflict
+
+
+Pip subprocess error:
+ERROR: Cannot install -r /home/ubuntu/condaenv.v97cxepl.requirements.txt (line 5) and wandb==0.21.4 because these package versions have conflicting dependencies.
+ERROR: ResolutionImpossible: for help visit https://pip.pypa.io/en/latest/topics/dependency-resolution/#dealing-with-dependency-conflicts
+
+failed
+
+CondaEnvException: Pip failed
+
 ```

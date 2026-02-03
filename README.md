@@ -17,7 +17,7 @@ curl ifconfig.me
 
 http://<instance-public-ip>:6080/vnc.html
 
-http://18.215.232.45:6080/vnc.html
+http://54.196.132.167:6080/vnc.html
 
 ## Step-1 --- configure the machine VNC + noVNC + base dependencies
 
@@ -127,4 +127,18 @@ cd leisaac
 
 pip install -e source/leisaac
 pip install pynput pyserial deepdiff feetech-servo-sdk
+```
+
+## TEST
+
+Start server
+
+```bash
+python gr00t/eval/run_gr00t_server.py --embodiment-tag NEW_EMBODIMENT --model-path /tmp/so100_finetune/checkpoint-10000 --device cuda:0 --host 127.0.0.1 --port 5555 --strict
+```
+
+Start leisaac
+
+```bash
+python scripts/evaluation/policy_inference.py --task=LeIsaac-SO101-PickOrange-v0 --eval_rounds=10 --policy_type=gr00tn1.6 --policy_host=localhost --policy_port=5555 --policy_timeout_ms=5000 --policy_action_horizon=16 --policy_language_instruction="Pick up the orange and place it on the plate" --device=cuda --enable_cameras
 ```
