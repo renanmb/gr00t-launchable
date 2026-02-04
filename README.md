@@ -112,7 +112,7 @@ conda deactivate
 # Make sure to be on home directory
 cd ~
 
-# Install leisaac
+# Install leisaac -- This process is wrong
 # Create and activate environment
 conda create -n leisaac python=3.10
 conda activate leisaac
