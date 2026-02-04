@@ -36,6 +36,18 @@ Total VRAM: 44.39 GB
 Architecture: Ada
 ```
 
+```txt
+PyTorch version: 2.7.0+cu128
+CUDA Available: True
+CUDA Version (torch): 12.8
+GPU Index: 0
+GPU Name: NVIDIA GeForce RTX 3090
+Compute Capability: 8.6
+Total VRAM: 23.53 GB
+Architecture: Ampere
+```
+
+
 ```bash
 (gr00t) ubuntu@brev-48mf8ilk:~/Isaac-GR00T$ python -c "import flash_attn; print(f'Flash Attention version: {flash_attn.__version__}')"
 Traceback (most recent call last):
