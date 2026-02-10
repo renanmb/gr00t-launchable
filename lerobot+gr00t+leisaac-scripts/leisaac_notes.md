@@ -63,3 +63,9 @@ there are also other ways like making a symbolic link or using LD_RELOAD
 [leisaac-example-scene](https://github.com/LightwheelAI/leisaac/releases/tag/v0.1.0)
 
 [kitchen_with_orange.zip](https://github.com/LightwheelAI/leisaac/releases/download/v0.1.0/kitchen_with_orange.zip)
+
+
+## Notes on dependencies
+
+lerobot = ["lerobot==0.4.2"]
+

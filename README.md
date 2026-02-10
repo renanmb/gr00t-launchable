@@ -17,7 +17,7 @@ curl ifconfig.me
 
 http://<instance-public-ip>:6080/vnc.html
 
-http://3.81.211.86:6080/vnc.html
+http://3.86.145.100:6080/vnc.html
 
 ## Step-1 --- configure the machine VNC + noVNC + base dependencies
 
@@ -26,7 +26,7 @@ setup-novnc.bash
 Must add to the script, make sure the files are copied or exist on the target machine
 
 ```bash
-scp setup-novnc.sh xorg.conf vdisplay.edid x11vnc-ubuntu.service novnc.service test-g6e-8xlarge-3dfe06:~
+scp setup-novnc.sh xorg.conf vdisplay.edid x11vnc-ubuntu.service novnc.service test-g6e-8xlarge-679b5d:~
 ```
 
 Make sure it is executable
@@ -35,8 +35,22 @@ Make sure it is executable
 chmod +x setup-novnc.sh
 ```
 
-
 ## Step-2 --- Install Conda + IsaacSim + IsaacLab
+
+TODO: must add a checkout command to guarantee it will checkout the tag for the right version
+
+Python = 3.10
+
+IsaacSim = 5.1
+
+isaaclab = 2.3.0
+
+| Dependency | Isaac Sim 5.1 |
+| :--- | :---: |
+| **Python** | 3.11 |
+| **Isaac Lab** | v2.3.0 |
+| **CUDA** | 12.8 |
+| **PyTorch** | 2.7.0 |
 
 install-conda_v2.sh
 
@@ -45,7 +59,7 @@ isaacsim_v2.sh
 isaaclab_v2.sh
 
 ```bash
-scp install-conda_v2.sh isaacsim_v2.sh isaaclab_v2.sh test-g6e-8xlarge-3dfe06:~
+scp install-conda_v2.sh isaacsim_v2.sh isaaclab_v2.sh test-g6e-8xlarge-679b5d:~
 ```
 
 Make sure it is executable
@@ -62,7 +76,9 @@ The script ```isaaclab_v2.sh``` needs change to run ```isaaclab -i``` so it fini
 
 Current Issues:
 
--- flash_attn
+- flash_attn == 2.7.4.post1 (gr00t) only installed on gr00t env
+- transformer == 4.51.3 (gr00t) for some reason transformers == 4.57.3 (isaaclab/leisaac)
+- lerobot == 0.4.2
 
 ```bash
 # Make sure it is outisde any conda env
@@ -73,6 +89,7 @@ curl -LsSf https://hf.co/cli/install.sh | bash
 cd ~
 git clone https://github.com/huggingface/lerobot.git
 cd lerobot
+git checkout v0.4.2
 
 conda create -y -n lerobot python=3.10
 conda activate lerobot
@@ -85,11 +102,11 @@ sudo apt install -y cmake build-essential pkg-config libavformat-dev libavcodec-
 
 # Install GR00T
 cd ~
+conda deactivate
 git clone https://github.com/NVIDIA/Isaac-GR00T
 cd Isaac-GR00T
 
-conda deactivate
-conda create -n gr00t python=3.10
+conda create -y -n gr00t python=3.10
 conda activate gr00t
 pip install --upgrade setuptools
 
@@ -107,11 +124,30 @@ pip install flash_attn --no-build-isolation
 
 # Run this if necessary
 pip install -e . --no-build-isolation
+
 # Make sure to deactivate
 conda deactivate
 # Make sure to be on home directory
 cd ~
 
+cd IsaacLab
+./isaaclab.sh --conda leisaac
+conda activate leisaac
+./isaaclab.sh -i
+
+
+cd ~
+git clone https://github.com/LightwheelAI/leisaac.git
+cd leisaac
+
+pip install -e source/leisaac
+pip install pynput pyserial deepdiff feetech-servo-sdk
+```
+
+Old
+
+```bash
+# This is wrong need to create the env with Isaalab
 # Install leisaac -- This process is wrong
 # Create and activate environment
 conda create -n leisaac python=3.10
@@ -120,13 +156,6 @@ conda activate leisaac
 conda install -c "nvidia/label/cuda-11.8.0" cuda-toolkit
 # Install PyTorch
 pip install torch==2.5.1 torchvision==0.20.1 --index-url https://download.pytorch.org/whl/cu118
-
-cd ~
-git clone https://github.com/LightwheelAI/leisaac.git
-cd leisaac
-
-pip install -e source/leisaac
-pip install pynput pyserial deepdiff feetech-servo-sdk
 ```
 
 ## TEST

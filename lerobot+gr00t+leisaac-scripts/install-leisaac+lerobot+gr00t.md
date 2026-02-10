@@ -25,6 +25,11 @@ curl -LsSf https://hf.co/cli/install.sh | bash
 
 Review: make sure the installed CLI is acessible by all users.
 
+## Notes on some dependencies
+
+
+
+
 
 ## Install lerobot+gr00t
 
