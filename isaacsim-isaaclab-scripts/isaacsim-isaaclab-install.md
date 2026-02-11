@@ -1,5 +1,65 @@
 # Installing IsaacSim and IsaacLab
 
+tried first: test-g6e-8xlarge-679b5d
+
+Install Conda + IsaacSim + IsaacLab
+
+install-conda_v2.sh
+
+isaacsim_v2.sh
+
+isaaclab_v3.sh
+
+test-g6e-8xlarge-4ad24a
+
+```bash
+scp install-conda_v2.sh isaacsim_v2.sh isaaclab_v2.sh test-g6e-8xlarge-4ad24a:~
+# Trying to run isaaclab -i
+scp install-conda_v2.sh isaacsim_v2.sh isaaclab_v3.sh test-g6e-8xlarge-4ad24a:~
+```
+
+Make sure it is executable
+
+```bash
+chmod +x install-conda_v2.sh isaacsim_v2.sh isaaclab_v2.sh
+
+chmod +x install-conda_v2.sh isaacsim_v2.sh isaaclab_v3.sh
+```
+
+Run into the following issue:
+
+```bash
+▶ Activating environment and running installation
+/home/ubuntu/IsaacLab/_isaac_sim/setup_conda_env.sh: line 19: ZSH_VERSION: unbound variable
+```
+
+The issue was solving by adding set +u and set -u. When set -u is active, any reference to a variable that hasn't been explicitly defined causes the script to crash immediately.
+
+- set +u: This tells the shell to ignore "unbound variable" errors. Since the Isaac Sim setup scripts check for shell-specific variables like ZSH_VERSION without default values, this prevents the crash.
+
+- set -u: We turn it back on immediately after activation to ensure the rest of your script remains robust and safe from typos.
+
+## Testing the isaaclab
+
+Training the Ant environment:
+
+```bash
+isaaclab -p scripts/reinforcement_learning/rsl_rl/train.py --task=Isaac-Ant-v0 --headless
+
+./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py --task=Isaac-Ant-v0 --headless
+```
+
+Running inference for the Ant
+
+```bash
+isaaclab -p scripts/reinforcement_learning/rsl_rl/play.py --task=Isaac-Ant-v0 --num_envs 32
+
+./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py --task=Isaac-Ant-v0 --num_envs 32
+```
+
+
+## Notes Below
+
 ```bash
 exec bash -l
 ```

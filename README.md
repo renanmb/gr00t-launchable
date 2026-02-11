@@ -13,11 +13,12 @@ brev ls
 ```bash
 curl ifconfig.me
 ```
-34.235.131.168
+
+54.198.95.233
 
 http://<instance-public-ip>:6080/vnc.html
 
-http://3.86.145.100:6080/vnc.html
+http://54.198.95.233:6080/vnc.html
 
 ## Step-1 --- configure the machine VNC + noVNC + base dependencies
 
@@ -26,7 +27,7 @@ setup-novnc.bash
 Must add to the script, make sure the files are copied or exist on the target machine
 
 ```bash
-scp setup-novnc.sh xorg.conf vdisplay.edid x11vnc-ubuntu.service novnc.service test-g6e-8xlarge-679b5d:~
+scp setup-novnc.sh xorg.conf vdisplay.edid x11vnc-ubuntu.service novnc.service test-g6e-8xlarge-4ad24a:~
 ```
 
 Make sure it is executable
