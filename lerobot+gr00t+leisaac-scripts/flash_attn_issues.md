@@ -168,6 +168,10 @@ conda env create -f environment.yml
 conda env update -n gr00t --file environment.yml
 ```
 
+```bash
+conda remove -n ENV_NAME --all
+```
+
 
 ## Error track
 

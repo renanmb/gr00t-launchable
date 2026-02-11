@@ -144,6 +144,15 @@ pip install -e source/leisaac
 pip install pynput pyserial deepdiff feetech-servo-sdk
 ```
 
+```bash
+scp so100_dualcam__modality.json test-g6e-8xlarge-679b5d:~
+scp environment.yml test-g6e-8xlarge-679b5d:~
+conda env update --file environment.yml --prune
+
+conda env create -f environment.yml
+conda activate isaaclab
+```
+
 Old
 
 ```bash
