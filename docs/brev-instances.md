@@ -1,5 +1,15 @@
 # General Infor about Brev instances
 
+Experiment Tracking:
+
+Instance Name:  test-g6e-8xlarge-f0631e
+
+Has everything up to GR00T installed
+
+Instance Name: test-g6e-8xlarge-65964e
+
+Figuring out leisaac vs isaaclab vs lerobot dependencies conflict
+
 ## AWS
 L40S
 
