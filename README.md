@@ -15,10 +15,13 @@ curl ifconfig.me
 ```
 
 54.198.161.130
+34.160.111.145
 
 http://<instance-public-ip>:6080/vnc.html
 
 http://54.198.161.130:6080/vnc.html
+
+http://34.160.111.145:6080/vnc.html
 
 ## Step-1 --- configure the machine VNC + noVNC + base dependencies
 

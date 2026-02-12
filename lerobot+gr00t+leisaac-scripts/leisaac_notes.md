@@ -1,5 +1,9 @@
 # Notes for installing LeIsaac
 
+leisaac seems to be installing the branch or commit from IsaacLab: **3c6e67b**
+
+
+
 The installation required gcc-13
 
 ```bash
@@ -131,4 +135,48 @@ ERROR: pip's dependency resolver does not currently take into account all the pa
 lerobot 0.4.2 requires packaging<26.0,>=24.2, but you have packaging 23.2 which is incompatible.
 wheel 0.46.3 requires packaging>=24.0, but you have packaging 23.2 which is incompatible.
 dex-retargeting 0.4.6 requires lxml>=5.2.2, but you have lxml 4.9.4 which is incompatible.
-````
+```
+
+Following these 
+
+```bash
+git clone https://github.com/LightwheelAI/leisaac.git --recursive
+cd leisaac
+git checkout v0.3.0
+
+# Create and activate environment
+conda create -y -n leisaac python=3.11
+conda activate leisaac
+
+# Install cuda-toolkit
+conda install -y -c "nvidia/label/cuda-12.8.1" cuda-toolkit
+
+# Install PyTorch
+pip install -U torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
+
+# Install IsaacSim
+pip install --upgrade pip
+pip install "isaacsim[all,extscache]==5.1.0" --extra-index-url https://pypi.nvidia.com
+
+# Install IsaacLab
+sudo apt install cmake build-essential
+
+cd ~
+
+cd leisaac/dependencies/IsaacLab
+./isaaclab.sh --install
+
+cd ../..
+pip install -e source/leisaac
+```
+
+
+```bash
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+lerobot 0.4.2 requires packaging<26.0,>=24.2, but you have packaging 23.0 which is incompatible.
+wheel 0.46.3 requires packaging>=24.0, but you have packaging 23.0 which is incompatible.
+dex-retargeting 0.4.6 requires lxml>=5.2.2, but you have lxml 4.9.4 which is incompatible.
+rerun-sdk 0.26.2 requires numpy>=2, but you have numpy 1.26.0 which is incompatible.
+
+Successfully installed PyJWT-2.11.0 isaacsim-5.1.0.0 isaacsim-app-5.1.0.0 isaacsim-asset-5.1.0.0 isaacsim-benchmark-5.1.0.0 isaacsim-code-editor-5.1.0.0 isaacsim-core-5.1.0.0 isaacsim-cortex-5.1.0.0 isaacsim-example-5.1.0.0 isaacsim-extscache-kit-5.1.0.0 isaacsim-extscache-kit-sdk-5.1.0.0 isaacsim-extscache-physics-5.1.0.0 isaacsim-gui-5.1.0.0 isaacsim-kernel-5.1.0.0 isaacsim-replicator-5.1.0.0 isaacsim-rl-5.1.0.0 isaacsim-robot-5.1.0.0 isaacsim-robot-motion-5.1.0.0 isaacsim-robot-setup-5.1.0.0 isaacsim-ros1-5.1.0.0 isaacsim-ros2-5.1.0.0 isaacsim-sensor-5.1.0.0 isaacsim-storage-5.1.0.0 isaacsim-template-5.1.0.0 isaacsim-test-5.1.0.0 isaacsim-utils-5.1.0.0 markupsafe-2.1.3 numpy-1.26.0 packaging-23.0
+```

@@ -134,8 +134,9 @@ conda activate leisaac
 
 
 cd ~
-git clone https://github.com/LightwheelAI/leisaac.git
+git clone https://github.com/LightwheelAI/leisaac.git --recursive
 cd leisaac
+git checkout v0.3.0
 
 pip install -e source/leisaac
 pip install pynput pyserial deepdiff feetech-servo-sdk
@@ -146,6 +147,38 @@ git checkout v0.4.3
 conda install -y ffmpeg -c conda-forge # on lerobot docs
 pip install -e .
 ```
+
+```bash
+git clone https://github.com/LightwheelAI/leisaac.git --recursive
+cd leisaac
+git checkout v0.3.0
+
+# Create and activate environment
+conda create -y -n leisaac python=3.11
+conda activate leisaac
+
+# Install cuda-toolkit
+conda install -y -c "nvidia/label/cuda-12.8.1" cuda-toolkit
+
+# Install PyTorch
+pip install -U torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
+
+# Install IsaacSim
+pip install --upgrade pip
+pip install "isaacsim[all,extscache]==5.1.0" --extra-index-url https://pypi.nvidia.com
+
+# Install IsaacLab
+sudo apt install cmake build-essential
+
+cd ~
+
+cd leisaac/dependencies/IsaacLab
+./isaaclab.sh --install
+
+cd ../..
+pip install -e source/leisaac
+```
+
 
 ## Changes to Isaac-GR00T pyproject.toml
 
