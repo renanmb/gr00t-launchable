@@ -23,10 +23,14 @@ Copy local files to instance:
 scp <local-file-path> <brev-instance-name>:<remote-file-path>
 ```
 
-test-g6e-8xlarge-644c23
+test-g6e-8xlarge-65964e
 
 ```bash
-scp setup-novnc_v2.sh xorg.conf vdisplay.edid x11vnc-ubuntu.service novnc.service test-g6e-8xlarge-a5b412:~
+scp setup-novnc_v2.sh xorg.conf vdisplay.edid x11vnc-ubuntu.service novnc.service test-g6e-8xlarge-65964e:~
+
+scp setup-novnc_v3.sh xorg.conf vdisplay.edid x11vnc-ubuntu.service novnc.service test-g6e-8xlarge-65964e:~
+
+chmod +x setup-novnc_v3.sh
 ```
 
 Important note: must disable wayland 

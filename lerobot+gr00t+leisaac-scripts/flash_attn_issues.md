@@ -152,6 +152,61 @@ Then compile the code:
 nvcc -O2 gpu_arch.cu -o gpu_arch
 ```
 
+## Installing Pre-built Flash Attention
+
+Must obtain the following information to pick the correct flash_attn
+
+- Python Version
+- CUDA Version
+- PyTorch version
+
+
+Getting PyTorch version
+
+```bash
+python -c "import torch; print(torch.__version__)"
+```
+
+Example: 2.7.1+cu126
+
+```bash
+flash_attn-[flash_attn Version]+cu[CUDA Version]torch[PyTorch Version]-cp[Python Version]-cp[Python Version]-linux_x86_64.whl
+
+# Example: Python 3.11, CUDA 12.4, PyTorch 2.5, and flash_attn 2.6.3
+flash_attn-2.6.3+cu124torch2.5-cp312-cp312-linux_x86_64.whl
+```
+
+Install flash attention
+
+```bash
+# Direct Install
+pip install https://github.com/mjun0812/flash-attention-prebuild-wheels/releases/download/v0.0.0/flash_attn-2.6.3+cu124torch2.5-cp312-cp312-linux_x86_64.whl
+
+pip install https://github.com/mjun0812/flash-attention-prebuild-wheels/releases/download/v0.0.0/flash_attn-2.7.4.post1+cu12torch2.7cxx11abiTRUE-cp311-cp311-linux_x86_64.whl
+
+pip install https://github.com/Dao-AILab/flash-attention/releases/tag/v2.7.4.post1/flash_attn-2.7.4.post1+cu12torch2.7cxx11abiTRUE-cp311-cp311-linux_x86_64.whl
+
+# Download and Local Install
+wget https://github.com/mjun0812/flash-attention-prebuild-wheels/releases/download/v0.0.0/flash_attn-2.7.4.post1+cu12torch2.7cxx11abiTRUE-cp311-cp311-linux_x86_64.whl
+pip install ./flash_attn-2.6.3+cu124torch2.5-cp312-cp312-linux_x86_64.whl
+
+# For python 311
+wget https://github.com/Dao-AILab/flash-attention/releases/tag/v2.7.4.post1/flash_attn-2.7.4.post1+cu12torch2.7cxx11abiTRUE-cp311-cp311-linux_x86_64.whl
+pip install ./flash_attn-2.7.4.post1+cu12torch2.7cxx11abiTRUE-cp311-cp311-linux_x86_64.whl
+
+# For python 311
+wget https://github.com/Dao-AILab/flash-attention/releases/tag/v2.7.4.post1/flash_attn-2.7.4.post1+cu12torch2.7cxx11abiTRUE-cp311-cp311-linux_x86_64.whl
+pip install ./flash_attn-2.7.4.post1+cu12torch2.7cxx11abiTRUE-cp311-cp311-linux_x86_64.whl
+
+# For python 310
+wget https://github.com/Dao-AILab/flash-attention/releases/tag/v2.7.4.post1/flash_attn-2.7.4.post1+cu12torch2.7cxx11abiTRUE-cp310-cp310-linux_x86_64.whl
+pip install ./flash_attn-2.7.4.post1+cu12torch2.7cxx11abiTRUE-cp310-cp310-linux_x86_64.whl
+
+wget https://github.com/Dao-AILab/flash-attention/releases/tag/v2.7.4.post1/flash_attn-2.7.4.post1+cu12torch2.7cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
+pip install ./flash_attn-2.7.4.post1+cu12torch2.7cxx11abiFAlSE-cp310-cp310-linux_x86_64.whl
+```
+
+
 
 ## Dependencies Experiments
 
@@ -197,3 +252,131 @@ failed
 CondaEnvException: Pip failed
 
 ```
+
+## Error installing lerobot first then Isaac-Gr00T
+
+```bash
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+lerobot 0.4.3 requires datasets<4.2.0,>=4.0.0, but you have datasets 3.6.0 which is incompatible.
+lerobot 0.4.3 requires wandb<0.25.0,>=0.24.0, but you have wandb 0.23.0 which is incompatible.
+rerun-sdk 0.26.2 requires numpy>=2, but you have numpy 1.26.4 which is incompatible.
+```
+
+GR00T pyproject.toml
+
+```toml
+#This is the single project pyproject.toml
+
+[build-system]
+requires = ["setuptools>=67", "wheel", "pip"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gr00t"
+version = "0.1.0"
+requires-python = "==3.10.*"
+# Mirror the main repo's baseline dependencies so install behaves the same.
+dependencies = [
+    "albumentations==1.4.18",
+    "av==15.0.0",
+    "diffusers==0.35.1",
+    "dm-tree==0.1.8",
+    "lmdb==1.7.5",
+    "msgpack==1.1.0",
+    "msgpack-numpy==0.4.8",
+    "pandas==2.2.3",
+    "peft==0.17.1",
+    "termcolor==3.2.0",
+    "torch==2.7.1",
+    "torchvision==0.22.1",
+    "transformers==4.51.3",
+    "tyro==0.9.17",
+    "flash-attn==2.7.4.post1",
+    "click==8.1.8",
+    "datasets>=4.0.0,<4.2.0",
+    "einops==0.8.1",
+    "gymnasium==1.2.2",
+    "matplotlib==3.10.1",
+    "numpy>=2",
+    "omegaconf==2.3.0",
+    "scipy==1.15.3",
+    "torchcodec==0.4.0",
+    "wandb>=0.24.0,<0.25.0",
+    "pyzmq==27.0.1",
+    "deepspeed==0.17.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "ipython",
+]
+tensorrt = [
+    "onnx>=1.20.0",
+    "tensorrt>=10.14.1.48.post1",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["gr00t*"]
+
+[tool.uv.extra-build-dependencies]
+flash-attn = ["torch==2.7.0", "numpy==1.26.4"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["gr00t"]
+exclude = [
+    "__pycache__",
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".vscode",
+    ".venv",
+    "dist",
+    "logs",
+    "*.ipynb",
+    "gr00t/model/modules/nvidia/Eagle-Block2A-2B-v2",
+    "external_dependencies",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+case-sensitive = false
+combine-as-imports = true
+force-sort-within-sections = true
+force-wrap-aliases = false
+split-on-trailing-comma = false
+lines-after-imports = 2
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+```
+
+
+## Issue with Torchcodec
+
+Check Torchdec version:
+
+```bash
+python -c "import torchcodec; print('torchcodec version:', torchcodec.__version__)"
+```
+
+
+
+```bash
+sudo apt-get update
+sudo apt-get install -y ffmpeg libavcodec-dev libavformat-dev libswscale-dev libavdevice-dev
+conda install -c conda-forge ffmpeg
+```
+

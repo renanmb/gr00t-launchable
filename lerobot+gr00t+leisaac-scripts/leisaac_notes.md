@@ -69,3 +69,66 @@ there are also other ways like making a symbolic link or using LD_RELOAD
 
 lerobot = ["lerobot==0.4.2"]
 
+## Install LeIsaac on IsaacLab and then install lerobot
+
+It has an errorcd
+
+```bash
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+nvidia-srl-usd-to-urdf 1.0.2 requires usd-core<26.0,>=25.2.post1; python_version >= "3.11", which is not installed.
+nvidia-srl-usd 2.0.0 requires usd-core<26.0,>=25.2.post1; python_version >= "3.11", which is not installed.
+nvidia-srl-base 1.3.0 requires docstring-parser==0.16, which is not installed.
+nvidia-srl-usd-to-urdf 1.0.2 requires lxml<5.0.0,>=4.9.2, but you have lxml 5.4.0 which is incompatible.
+nvidia-srl-usd-to-urdf 1.0.2 requires numpy<2.0.0,>=1.21.5, but you have numpy 2.4.2 which is incompatible.
+nvidia-srl-usd 2.0.0 requires numpy<2.0.0,>=1.21.5, but you have numpy 2.4.2 which is incompatible.
+numba 0.59.1 requires numpy<1.27,>=1.22, but you have numpy 2.4.2 which is incompatible.
+isaaclab-tasks 0.11.13 requires numpy<2, but you have numpy 2.4.2 which is incompatible.
+isaaclab-rl 0.4.7 requires numpy<2, but you have numpy 2.4.2 which is incompatible.
+isaaclab-rl 0.4.7 requires packaging<24, but you have packaging 25.0 which is incompatible.
+cmeel-boost 1.83.0 requires numpy~=1.26.0; python_version >= "3.9", but you have numpy 2.4.2 which is incompatible.
+dex-retargeting 0.4.6 requires numpy<2.0.0,>=1.21.0, but you have numpy 2.4.2 which is incompatible.
+isaaclab 0.54.3 requires numpy<2, but you have numpy 2.4.2 which is incompatible.
+```
+
+New issues trying to fix the old one:
+
+```bash
+   98  cd lerobot/
+   99  git checkout v0.4.2
+  100  pip install -e .
+  101  pip install numpy<2
+  102  pip install numpy<=2
+  103  pip install numpy==1.26.4
+  104  pip install lxml
+  105  pip install lxml>=5.2.2
+  106  pip show packaging
+  107  pip list --outdated packaging
+  108  pip install packaging==23.2
+  109  pip install packaging==24.2
+```
+
+Downgrade Packaging and have issues
+
+```bash
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+lerobot 0.4.2 requires packaging<26.0,>=24.2, but you have packaging 23.2 which is incompatible.
+wheel 0.46.3 requires packaging>=24.0, but you have packaging 23.2 which is incompatible.
+dex-retargeting 0.4.6 requires lxml>=5.2.2, but you have lxml 4.9.4 which is incompatible.
+```
+
+Upgrade it and have more issues
+
+```bash
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+isaaclab-rl 0.4.7 requires packaging<24, but you have packaging 24.2 which is incompatible.
+isaaclab 2.3.2.post1 requires packaging<24, but you have packaging 24.2 which is incompatible.
+dex-retargeting 0.4.6 requires lxml>=5.2.2, but you have lxml 4.9.4 which is incompatible.
+```
+
+
+```bash
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+lerobot 0.4.2 requires packaging<26.0,>=24.2, but you have packaging 23.2 which is incompatible.
+wheel 0.46.3 requires packaging>=24.0, but you have packaging 23.2 which is incompatible.
+dex-retargeting 0.4.6 requires lxml>=5.2.2, but you have lxml 4.9.4 which is incompatible.
+````
