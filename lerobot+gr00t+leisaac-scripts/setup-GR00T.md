@@ -290,5 +290,16 @@ section-order = ["future", "standard-library", "third-party", "first-party", "lo
 ```
 
 
+## Error tracking for Script
 
+Running the script
+
+setup-gr00t.sh
+
+```bash
+>>> Installing LeRobot in editable mode                                                           
+                                                                                                  
+                                                                                                  
+CondaError: Run 'conda init' before 'conda activate' 
+```
 
