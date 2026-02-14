@@ -11,7 +11,7 @@ cd leisaac
 git checkout v0.3.0
 
 # Create and activate environment
-conda create -y -n leisaac python=3.11
+conda create -y -n leisaac python=3.11 # try 3.10
 conda activate leisaac
 
 # Install cuda-toolkit
@@ -22,7 +22,7 @@ pip install -U torch==2.7.0 torchvision==0.22.0 --index-url https://download.pyt
 
 # Install IsaacSim
 pip install --upgrade pip
-pip install "isaacsim[all,extscache]==5.1.0" --extra-index-url https://pypi.nvidia.com
+pip install "isaacsim[all,extscache]==5.1.0" --extra-index-url https://pypi.nvidia.com # try 4.5
 
 # Install IsaacLab
 sudo apt install cmake build-essential
