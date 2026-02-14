@@ -14,21 +14,21 @@ Dependencies:
 Instance Name: test-g6e-8xlarge-f0631e
 
 ```bash
-# Make sure it is outisde any conda env
+# Make sure it is outisde any conda env and at Home
+cd ~
 conda deactivate
 
 # Install Huggingface CLI
 curl -LsSf https://hf.co/cli/install.sh | bash
 
-# Install LeRobot and Gr00t same environment
-cd ~
+# Install LeRobot and Gr00t at the same environment conda env
 git clone https://github.com/huggingface/lerobot.git
 cd lerobot
 git checkout v0.4.3
 conda create -y -n gr00t python=3.10
 conda activate gr00t
 
-# conda install ffmpeg --- Had isues with Torchcodec 
+# conda install ffmpeg
 sudo apt-get update
 sudo apt-get install -y ffmpeg libavcodec-dev libavformat-dev libswscale-dev libavdevice-dev
 conda install -y ffmpeg -c conda-forge
@@ -36,13 +36,12 @@ conda install -y ffmpeg -c conda-forge
 # Install lerobot in editable mode
 pip install -e . 
 
-# Clone and Install GR00T
+# Clone and Install Isaac-GR00T
 cd ~
 git clone https://github.com/NVIDIA/Isaac-GR00T
 cd Isaac-GR00T
 
-# Change pyproject.toml
-
+# Make sure the pyproject.toml has been changed before running pip install -e
 pip install -e . --no-build-isolation
 ```
 

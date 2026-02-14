@@ -101,9 +101,17 @@ cd ~
 git clone https://github.com/NVIDIA/Isaac-GR00T
 cd Isaac-GR00T
 
-# Change pyproject.toml
+# Change pyproject.toml 
 
+# Install Isaac-GR00T source in editable mode
 pip install -e . --no-build-isolation
+```
+
+Change the pyproject.toml inside Isaac-GR00T
+
+```bash
+# Change pyproject.toml
+scp pyproject.toml test-g6e-8xlarge-f0631e:~/Isaac-GR00T
 ```
 
 Copy the Modality.json
@@ -137,6 +145,10 @@ pip install -U torch==2.7.0 torchvision==0.22.0 --index-url https://download.pyt
 # Install IsaacSim
 pip install --upgrade pip
 pip install "isaacsim[all,extscache]==5.1.0" --extra-index-url https://pypi.nvidia.com
+
+# Verify IsaacSim Installation
+# note: you can pass the argument "--help" to see all arguments possible.
+isaacsim
 
 # Install IsaacLab
 sudo apt install cmake build-essential
