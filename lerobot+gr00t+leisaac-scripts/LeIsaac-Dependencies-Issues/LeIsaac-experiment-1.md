@@ -2,9 +2,10 @@
 
 LeRobot is used for very few things witthin leisaac and it can cause several issues.
 
+Initial idea is Refactoring ```robot_utils.py``` to remove the dependency on LeRobot.
 
+This could work, alternatively can just change the **lerobot_dataset_handler**
 
-Refactoring ```robot_utils.py``` to remove the dependency on LeRobot.
 
 The File can be found at "/home/goat/Documents/GitHub/renanmb/leisaac/source/leisaac/leisaac/utils/robot_utils.py", line 12
 
