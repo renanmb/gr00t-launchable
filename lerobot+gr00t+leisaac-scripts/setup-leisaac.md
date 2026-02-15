@@ -275,3 +275,11 @@ Traceback (most recent call last):
   File "/home/goat/anaconda3/envs/leisaac/lib/python3.11/site-packages/gymnasium/envs/registration.py", line 746, in make
     raise type(e)(
 ```
+
+
+```bash
+pip install "usd-core<26.0,>=25.2.post1"
+pip install "lxml<5.0.0,>=4.9.2"
+```
+
+Updating the lxml causes: dex-retargeting 0.4.6 requires lxml>=5.2.2, but you have lxml 4.9.4 which is incompatible.

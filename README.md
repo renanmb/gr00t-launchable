@@ -210,14 +210,15 @@ TODO: modify the output directory
 
 Start Isaac-GR00T Client server
 
+
+```bash
+python gr00t/eval/run_gr00t_server.py --embodiment-tag NEW_EMBODIMENT --model-path ./tmp/so100_finetune_orange/checkpoint-10000 --device cuda:0 --host 127.0.0.0 --port 5555 --strict
+```
+
 Prefer --host 127.0.0.0 --port 5555 sometimes says 127.0.0.1 is busy
 
 ```bash
 python gr00t/eval/run_gr00t_server.py --embodiment-tag NEW_EMBODIMENT --model-path ./tmp/so100_finetune_orange/checkpoint-10000 --device cuda:0 --host 127.0.0.1 --port 5555 --strict
-```
-
-```bash
-python gr00t/eval/run_gr00t_server.py --embodiment-tag NEW_EMBODIMENT --model-path ./tmp/so100_finetune_orange/checkpoint-10000 --device cuda:0 --host 127.0.0.0 --port 5555 --strict
 ```
 
 ## Testing leisaac
