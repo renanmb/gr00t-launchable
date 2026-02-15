@@ -7,8 +7,31 @@ numpy version is a big one
 Error Handling for avoiding Lerobot inside LeIsaac caused infinite loop.
 
 
+## Summary
 
-Tracing the Issues:
+Summary of why LeRobot is causing Issues:
+
+LeIsaac is using **LeRobotDatasetCfg** which is a class inherited from ```lerobot.datasets.lerobot_dataset import LeRobotDataset``` to build a dictionary with all the metadata to build the IsaacLab Environment.
+
+
+```python
+@configclass
+class LeRobotDatasetCfg:
+    """Configuration for the LeRobotDataset."""
+
+    repo_id: str = None
+    """Lerobot Dataset repository ID."""
+    fps: int = 30
+    """Lerobot Dataset frames per second."""
+    robot_type: str = "so101_follower"
+    """Robot type: so101_follower or bi_so101_follower, etc."""
+    features: dict = None
+    """Features for the LeRobotDataset."""
+    action_align: bool = False
+    """Whether the action shape equals to the joint number. If action align, we will convert action to lerobot limit range."""
+```    
+
+## Tracing the Issue
 
 **Step - 1**
 
@@ -250,7 +273,7 @@ File "/home/goat/Documents/GitHub/renanmb/leisaac/source/leisaac/leisaac/devices
 from .device_base import DeviceBase
 from .gamepad import SO101Gamepad
 from .keyboard import SO101Keyboard
-from .lekiwi import LeKiwiGamepad, LeKiwiKeyboard, LeKiwiLeader
+from .lekiwi import LeKiwiGamepad, LeKiwiKeyboard, LeKiwiLeader # this line
 from .lerobot import BiSO101Leader, SO101Leader
 ```
 
@@ -259,7 +282,7 @@ from .lerobot import BiSO101Leader, SO101Leader
 File "/home/goat/Documents/GitHub/renanmb/leisaac/source/leisaac/leisaac/devices/lekiwi/__init__.py", line 1
 
 ```python
-from .lekiwi_gamepad import LeKiwiGamepad
+from .lekiwi_gamepad import LeKiwiGamepad # This line
 from .lekiwi_keyboard import LeKiwiKeyboard
 from .lekiwi_leader import LeKiwiLeader
 ```
@@ -272,15 +295,82 @@ File "/home/goat/Documents/GitHub/renanmb/leisaac/source/leisaac/leisaac/devices
 from leisaac.utils.robot_utils import convert_lekiwi_wheel_action_robot2env
 ```
 
+The function **convert_lekiwi_wheel_action_robot2env** from robot_utils is trying to return state which is required by IsaacLab.
+
+```python
+    def get_device_state(self):
+        arm_action = super().get_device_state()
+
+        wheel_action_user = torch.tensor(self._vel_command, device=self.env.device).repeat(self.env.num_envs, 1)
+
+        robot_base_theta = self.env.scene["robot"].data.joint_pos[:, self._joint_names.index("base_theta")]
+        wheel_action_world = convert_lekiwi_wheel_action_robot2env(wheel_action_user, robot_base_theta)[0]
+        wheel_action_world = wheel_action_world.cpu().numpy()
+
+        return np.concatenate([arm_action, wheel_action_world])
+```
+
+
+
 **Step - 11**
 
-robot_utils Depends on the Dataset Handler Which is trying to import LeRobot
+**robot_utils** Depends on the Dataset Handler Which is trying to import LeRobot
 
 File "/home/goat/Documents/GitHub/renanmb/leisaac/source/leisaac/leisaac/utils/robot_utils.py", line 12
 
 ```python
 from leisaac.enhance.datasets.lerobot_dataset_handler import LeRobotDatasetCfg
 ```
+
+It is using the **LeRobotDatasetCfg** to build the dictionary with features necessary for IsaacLab.
+
+```python
+def build_feature_from_env(env: ManagerBasedEnv | DirectRLEnv, dataset_cfg: LeRobotDatasetCfg) -> dict:
+    """
+    Build the feature from the environment.
+    """
+    features = {}
+
+    default_feature_joint_names = env.cfg.default_feature_joint_names
+    if isinstance(env, ManagerBasedEnv):
+        action_dim = env.action_manager.total_action_dim
+    else:
+        action_dim = env.actions.shape[-1]
+
+    if action_dim != len(default_feature_joint_names):
+        # [A bit tricky, currently works because the action dimension matches the joints only when we use leader control]
+        action_joint_names = [f"dim_{index}" for index in range(action_dim)]
+        dataset_cfg.action_align = False
+    else:
+        action_joint_names = default_feature_joint_names
+        dataset_cfg.action_align = True
+    features["action"] = asdict(StateFeatureItem(dtype="float32", shape=(action_dim,), names=action_joint_names))
+    features["observation.state"] = asdict(
+        StateFeatureItem(dtype="float32", shape=(len(default_feature_joint_names),), names=default_feature_joint_names)
+    )
+
+    for camera_key, camera_sensor in env.scene.sensors.items():
+        if isinstance(camera_sensor, Camera):
+            height, width = camera_sensor.image_shape
+            video_feature_item = VideoFeatureItem(
+                dtype="video", shape=[height, width, 3], names=["height", "width", "channels"]
+            )
+            video_feature_item.video_info["video.height"] = height
+            video_feature_item.video_info["video.width"] = width
+            video_feature_item.video_info["video.fps"] = dataset_cfg.fps
+            features[f"observation.images.{camera_key}"] = asdict(video_feature_item)
+
+    return features
+```
+
+My guess the features dictionary will look like this:
+
+| Key                       | Data Type | Description                                      |
+| ------------------------- | --------- | ------------------------------------------------ |
+| action                    | float32   | The control signals sent to the robot.           |
+| observation.state         | float32   | The actual joint positions/velocities.           |
+| observation.images.{name} | video     | Compressed video stream from each camera sensor. |
+
 
 **Step - 12**
 

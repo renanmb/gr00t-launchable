@@ -120,7 +120,7 @@ What changed?
 - **Independence:** The function no longer requires the lerobot library's config structures to run, making it more portable if you decide to use a different data logging library later.
 
 
-How to call it now:
+**How to call it now:**
 
 If you still need to update a config object elsewhere in your code, you do it at the call site:
 
@@ -132,6 +132,9 @@ features = build_feature_from_env(env, my_cfg)
 features, aligned = build_feature_from_env(env, fps=my_cfg.fps)
 my_cfg.action_align = aligned
 ```
+
+The change to **dataset_cfg.action_align** is not necessary and cause further issues.
+
 
 
 ## Function Breakdown for build_feature_from_env
@@ -160,8 +163,6 @@ The function loops through every camera in your scene and for each one camera, i
 
 The resulting features dictionary will look something like this:
 
-Here is your markdown table:
-
 | Key                       | Data Type | Description                                      |
 | ------------------------- | --------- | ------------------------------------------------ |
 | action                    | float32   | The control signals sent to the robot.           |
@@ -177,7 +178,7 @@ Here are the three specific roles it plays:
 
 - **Flagging Alignment (action_align):** It sets a boolean flag (True or False) within the config. If the number of actions the robot takes matches the number of joint names provided, it assumes they are "aligned." If not (e.g., you're using a high-level controller rather than direct joint control), it marks them as unaligned and generates generic names like dim_0, dim_1.
 
-- **Providing Global Metadata:** It provides the FPS (Frames Per Second) value (**dataset_cfg.fps**). This is critical for the VideoFeatureItem, as the dataset needs to know the timing of the recorded frames for proper playback and training.
+- **Providing Global Metadata:** It provides the FPS (Frames Per Second) value (**dataset_cfg.fps**). This is critical for the **VideoFeatureItem**, as the dataset needs to know the timing of the recorded frames for proper playback and training.
 
 - **Persisting State:** Since **dataset_cfg** is passed by reference, the changes made inside this function (like setting **action_align**) stick around. This ensures that when the dataset is actually written to disk later, the metadata accurately reflects what was detected in the environment.
 
