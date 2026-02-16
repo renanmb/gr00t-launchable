@@ -31,7 +31,7 @@ class LeRobotDatasetCfg:
     """Whether the action shape equals to the joint number. If action align, we will convert action to lerobot limit range."""
 ```    
 
-## Tracing the Issue
+## Tracing the Issue - LEROBOT
 
 **Step - 1**
 
@@ -411,4 +411,25 @@ Traceback (most recent call last):
   File "/home/goat/Documents/GitHub/renanmb/leisaac/source/leisaac/leisaac/enhance/datasets/lerobot_dataset_handler.py", line 6, in <module>
     from lerobot.datasets.lerobot_dataset import LeRobotDataset
 ModuleNotFoundError: No module named 'lerobot'
+```
+
+## Tracing issue with ZMQ
+
+
+
+```bash
+Creating window for environment.
+[INFO]: Completed setting up the environment...
+Traceback (most recent call last):
+  File "/home/goat/Documents/GitHub/renanmb/leisaac/scripts/evaluation/policy_inference.py", line 281, in <module>
+    main()
+  File "/home/goat/Documents/GitHub/renanmb/leisaac/scripts/evaluation/policy_inference.py", line 179, in main
+    policy = Gr00t16ServicePolicyClient(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/goat/Documents/GitHub/renanmb/leisaac/source/leisaac/leisaac/policy/service_policy_clients.py", line 109, in __init__
+    super().__init__(host=host, port=port, timeout_ms=timeout_ms, ping_endpoint="ping")
+  File "/home/goat/Documents/GitHub/renanmb/leisaac/source/leisaac/leisaac/policy/base.py", line 54, in __init__
+    self.context = zmq.Context()
+                   ^^^
+NameError: name 'zmq' is not defined
 ```

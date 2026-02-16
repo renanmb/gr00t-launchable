@@ -162,7 +162,29 @@ cd ../..
 pip install -e source/leisaac
 ```
 
+Reviewed Installation steps for LeIsaac
 
+```bash
+# Create a Conda Environment for IsaacLab
+cd ~
+cd IsaacLab
+./isaaclab.sh --conda leisaac
+conda activate leisaac
+isaaclab -i
+
+# Install leisaac
+git clone https://github.com/LightwheelAI/leisaac.git --recursive
+cd leisaac
+git checkout v0.3.0
+
+pip install -e source/leisaac
+# Instal the optional dependencies for gr00t
+pip install -e source/leisaac[gr00t]
+```
+
+**ATTENTION**
+
+Made a custom **lerobot_dataset_handler.py** in leisaac so LeRobot is optional dataset handler. This is necessary because IsaacLab requires a dictionary to configure and perform changes in the environment.
 
 ## Test Isaac-GR00T
 
