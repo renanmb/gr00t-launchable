@@ -6,10 +6,25 @@ The idea is to make a script that will run the scripts in order and additionally
 2. setup-conda.sh 
 3. setup-isaacsim.sh 
 4. setup-isaaclab.sh 
-5. setup-gr00t.sh 
-6. setup-leisaac.sh
+5. setup-gr00t.sh (optional)
+6. setup-leisaac.sh (optional)
+
+Need to study how to install IsaacSim Extensions and IsaacLab Projects.
+
+```bash
+post_install.sh
+
+warmup.sh
+```
 
 
+IsaacSim Flags
+
+* --ext-folder PATH : Add extension folder to look extensions in.
+* --ext-path PATH : Add direct extension path (allows adding single extension).
+
+
+## Making installer run after reboot
 
 The following is an example using custom functions need to improve.
 
