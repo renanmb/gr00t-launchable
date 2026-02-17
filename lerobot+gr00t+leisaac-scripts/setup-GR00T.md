@@ -292,9 +292,8 @@ section-order = ["future", "standard-library", "third-party", "first-party", "lo
 
 ## Error tracking for Script
 
-Running the script
 
-setup-gr00t.sh
+Running the script: setup-gr00t.sh
 
 ```bash
 >>> Installing LeRobot in editable mode                                                           
@@ -303,3 +302,15 @@ setup-gr00t.sh
 CondaError: Run 'conda init' before 'conda activate' 
 ```
 
+
+
+
+Can use conda run in the command
+
+```bash
+log "Installing LeRobot in editable mode"
+sudo -u "$ANSIBLE_USER" -i conda run -n "$CONDA_ENV_NAME" --cwd "$HOME_DIR/lerobot" pip install -e .
+
+log "Installing Isaac-GR00T in editable mode"
+sudo -u "$ANSIBLE_USER" -i conda run -n "$CONDA_ENV_NAME" --cwd "$HOME_DIR/Isaac-GR00T" pip install -e . --no-build-isolation
+```

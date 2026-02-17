@@ -5,6 +5,41 @@ This install leisaac using a specific version of isaaclab and a pip installation
 
 ## Step 1 - Installation
 
+Installing LeIsaac v0.3.0 
+
+```bash
+# Create a Conda Environment for IsaacLab
+cd ~
+cd IsaacLab
+./isaaclab.sh --conda leisaac
+conda activate leisaac
+isaaclab -i
+
+# Install leisaac --- Remember this step requires changes to Dataset Handler
+git clone https://github.com/LightwheelAI/leisaac.git --recursive
+cd leisaac
+git checkout v0.3.0
+
+pip install -e source/leisaac
+# Instal the optional dependencies for gr00t
+pip install -e source/leisaac[gr00t]
+```
+
+Created a repo with a modified Dataset Handler.
+
+This is the leisaac with the modified  ```lerobot_dataset_handler.py```
+
+Found Within: ```/source/leisaac/leisaac/enhance/datasets/lerobot_dataset_handler.py```
+
+```bash
+git clone https://github.com/renanmb/leisaac --recursive
+cd leisaac
+git checkout dataset-handler
+```
+
+
+### Older Experiments
+
 ```bash
 git clone https://github.com/LightwheelAI/leisaac.git --recursive
 cd leisaac
@@ -62,6 +97,8 @@ sudo apt install cmake build-essential
 cd ../..
 pip install -e source/leisaac
 ```
+
+
 
 For example in the container there is a Env var for Accepting the EULA so it doesnt stop installation
 

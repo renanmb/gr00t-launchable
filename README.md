@@ -182,6 +182,18 @@ pip install -e source/leisaac
 pip install -e source/leisaac[gr00t]
 ```
 
+This is the leisaac with the modified  ```lerobot_dataset_handler.py```
+
+Found Within: ```/source/leisaac/leisaac/enhance/datasets/lerobot_dataset_handler.py```
+
+```bash
+git clone https://github.com/renanmb/leisaac --recursive
+cd leisaac
+git checkout dataset-handler
+```
+
+
+
 **ATTENTION**
 
 Made a custom **lerobot_dataset_handler.py** in leisaac so LeRobot is optional dataset handler. This is necessary because IsaacLab requires a dictionary to configure and perform changes in the environment.

@@ -67,7 +67,9 @@ sudo -u "$ANSIBLE_USER" -i conda install -y -n "$CONDA_ENV_NAME" ffmpeg -c conda
 # INSTALL LEROBOT
 ############################
 log "Installing LeRobot in editable mode"
-sudo -u "$ANSIBLE_USER" -i bash -c "conda activate $CONDA_ENV_NAME && cd $HOME_DIR/lerobot && pip install -e ."
+# sudo -u "$ANSIBLE_USER" -i bash -c "conda activate $CONDA_ENV_NAME && cd $HOME_DIR/lerobot && pip install -e ."
+
+sudo -u "$ANSIBLE_USER" -i conda run -n "$CONDA_ENV_NAME" --cwd "$HOME_DIR/lerobot" pip install -e .
 
 ############################
 # ISAAC-GR00T SETUP
@@ -91,7 +93,12 @@ else
     log "Warning: Source pyproject.toml not found at $HOME_DIR, skipping replacement"
 fi
 
+############################
+# INSTALL ISAAC-GR00T
+############################
 log "Installing Isaac-GR00T in editable mode"
-sudo -u "$ANSIBLE_USER" -i bash -c "conda activate $CONDA_ENV_NAME && cd $HOME_DIR/Isaac-GR00T && pip install -e . --no-build-isolation"
+# sudo -u "$ANSIBLE_USER" -i bash -c "conda activate $CONDA_ENV_NAME && cd $HOME_DIR/Isaac-GR00T && pip install -e . --no-build-isolation"
+
+sudo -u "$ANSIBLE_USER" -i conda run -n "$CONDA_ENV_NAME" --cwd "$HOME_DIR/Isaac-GR00T" pip install -e . --no-build-isolation
 
 log "Setup completed successfully."

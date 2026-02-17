@@ -415,6 +415,11 @@ ModuleNotFoundError: No module named 'lerobot'
 
 ## Tracing issue with ZMQ
 
+Had to install ZMQ, pip install groot optional dependencies
+
+```bash
+pip install -e source/leisaac[gr00t]
+```
 
 
 ```bash
@@ -432,4 +437,29 @@ Traceback (most recent call last):
     self.context = zmq.Context()
                    ^^^
 NameError: name 'zmq' is not defined
+```
+
+
+## Some Dependencies Still off
+
+
+
+```bash
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+nvidia-srl-base 1.3.0 requires docstring-parser==0.16, which is not installed.
+nvidia-srl-usd 2.0.0 requires usd-core<26.0,>=25.2.post1; python_version >= "3.11", which is not installed.
+fastapi 0.115.7 requires starlette<0.46.0,>=0.40.0, but you have starlette 0.49.1 which is incompatible.
+Successfully installed leisaac-0.3.0 pydantic-2.10.6 pydantic-core-2.27.2 pyzmq-27.1.0
+```
+
+Error:
+
+```bash
+Traceback (most recent call last):
+  File "/home/goat/Documents/GitHub/renanmb/leisaac/scripts/evaluation/policy_inference.py", line 57, in <module>
+    import torch
+  File "/home/goat/anaconda3/envs/leisaac2/lib/python3.11/site-packages/torch/__init__.py", line 409, in <module>
+    from torch._C import *  # noqa: F403
+    ^^^^^^^^^^^^^^^^^^^^^^
+ImportError: libcudnn.so.9: cannot open shared object file: No such file or directory
 ```
