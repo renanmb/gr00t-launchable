@@ -14,6 +14,12 @@ scp setup-novnc.sh setup-conda.sh setup-isaacsim.sh setup-isaaclab.sh setup-gr00
 chmod +x setup-novnc.sh setup-conda.sh setup-isaacsim.sh setup-isaaclab.sh setup-gr00t.sh setup-leisaac.sh
 ```
 
+Before Running ```setup-gr00t.sh``` make sure to have the new ```pyproject.toml``` ate the home folder.
+
+```bash
+scp pyproject.toml test-g6e-8xlarge-2eb89f:~
+```
+
 Delete and change the pyproject.toml
 
 ```bash
@@ -22,8 +28,6 @@ sudo rm -f ~/Isaac-GR00T/pyproject.toml
 
 # Change pyproject.toml
 scp pyproject.toml test-g6e-8xlarge-2eb89f:~/Isaac-GR00T
-
-scp pyproject.toml test-g6e-8xlarge-2eb89f:~
 ```
 
 Copy the Modality.json
