@@ -86,7 +86,7 @@ Installing the wrong version of stuff brick the whole computer.
 - [Installing cuDNN on Linux](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.0.0/installation/linux.html)
 - [Nvidia Network Repository Installation](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#network-repo-installation-for-ubuntu)
 - [Post-installation Actions](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#post-installation-actions)
-
+- [Installing cuDNN Backend on Linux](https://docs.nvidia.com/deeplearning/cudnn/installation/latest/linux.html)
 
 
 ### Step 1 — Confirm your CUDA version
@@ -214,3 +214,59 @@ Before continuing, it is important to verify that the CUDA toolkit can find and 
 
 
 
+## MISC
+
+NVIDIA split cuDNN into runtime vs dev packages which does not seem to be fully explained in their documentation website. You need both runtime + development headers to run stuff like Isaac / native CUDA builds.
+
+```bash
+sudo apt-get install cudnn9-cuda-13
+```
+
+| Package                 | Contains                          | Needed for      |
+| ----------------------- | --------------------------------- | --------------- |
+| `cudnn9-cuda-13`        | meta package (pulls runtime libs) | running apps    |
+| `libcudnn9-cuda-13`     | actual shared libraries (.so)     | runtime linking |
+| `libcudnn9-dev-cuda-13` | headers + static libs             | **compilation** |
+
+
+IsaacLab compiles native extensions, so it needs the headers:
+
+```swift
+/usr/local/cuda/include/cudnn*.h
+```
+
+So we install runtime and dev package explicitly. The meta package cudnn9-cuda-13 is optional and redundant once you install these directly.
+
+```bash
+sudo apt update
+sudo apt install -y libcudnn9-cuda-13 libcudnn9-dev-cuda-13
+```
+
+After Installing we can check:
+
+```bash
+ls /usr/local/cuda/include | grep cudnn
+```
+
+Expected to see:
+
+```bash
+cudnn.h
+cudnn_version.h
+```
+
+### Confusion with Nvidia Meta Package
+
+The ```cudnn9-cuda-13``` is just a meta package (a convenience package). The runtime libraries are ```libcudnn9-cuda-13``` and ```libcudnn9-dev-cuda-13```.
+
+| Package                 | Type         | What it really is         |
+| ----------------------- | ------------ | ------------------------- |
+| `cudnn9-cuda-13`        | meta package | installer shortcut        |
+| `libcudnn9-cuda-13`     | runtime libs | the real `.so` files      |
+| `libcudnn9-dev-cuda-13` | dev headers  | the headers + static libs |
+
+**Why not rely on the meta package ?**
+
+Because depending on repo version, ```cudnn9-cuda-13``` may or may not pull the -dev package automatically.
+
+For IsaacLab we must guarantee headers exist, so we install explicitly.
