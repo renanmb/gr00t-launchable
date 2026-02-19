@@ -11,6 +11,9 @@ The idea is to make a script that will run the scripts in order and additionally
 
 Need to study how to install IsaacSim Extensions and IsaacLab Projects.
 
+
+Need to add a script to perform the post install and the cache warmup with IsaacSim.
+
 ```bash
 post_install.sh
 
