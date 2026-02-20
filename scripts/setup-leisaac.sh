@@ -52,7 +52,7 @@ fi
 ############################
 log "Cloning LeIsaac (${LEISAAC_VERSION})"
 if [ ! -d "$HOME_DIR/leisaac" ]; then
-    sudo -u "$ANSIBLE_USER" git clone --recursive https://github.com/LightwheelAI/leisaac.git "$HOME_DIR/leisaac"
+    sudo -u "$ANSIBLE_USER" git clone --recursive https://github.com/renanmb/leisaac.git "$HOME_DIR/leisaac"
     cd "$HOME_DIR/leisaac"
     sudo -u "$ANSIBLE_USER" git checkout "$LEISAAC_VERSION"
 fi

@@ -46,3 +46,9 @@ http://<instance-public-ip>:6080/vnc.html
 
 http://54.175.214.162:6080/vnc.html
 
+
+## Notes
+
+The LeIsaac script needs attention to which repo using since it needs to decouple LEROBOT dependency
+
+The GR00T repo needs to make sure the pyproject.toml is correct. Might evaluate using a custom repo.
