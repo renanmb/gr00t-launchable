@@ -4,23 +4,27 @@ Start locking the scripts that work
 
 Instance Name: 
 
-test-g6e-8xlarge-2eb89f
+test-g6e-8xlarge-51b10e
 
 ```bash
-scp setup-novnc.sh setup-conda.sh setup-isaacsim.sh setup-isaaclab.sh setup-gr00t.sh setup-leisaac.sh xorg.conf vdisplay.edid x11vnc-ubuntu.service novnc.service test-g6e-8xlarge-2eb89f:~
+scp installer_v0.sh setup-novnc.sh setup-conda.sh setup-isaacsim.sh setup-isaaclab.sh setup-gr00t.sh setup-leisaac.sh xorg.conf vdisplay.edid x11vnc-ubuntu.service novnc.service test-g6e-8xlarge-51b10e:~
 ```
 
 ```bash
-chmod +x setup-novnc.sh setup-conda.sh setup-isaacsim.sh setup-isaaclab.sh setup-gr00t.sh setup-leisaac.sh
+chmod +x installer_v0.sh setup-novnc.sh setup-conda.sh setup-isaacsim.sh setup-isaaclab.sh setup-gr00t.sh setup-leisaac.sh
 ```
 
-Before Running ```setup-gr00t.sh``` make sure to have the new ```pyproject.toml``` ate the home folder.
+
+> [!IMPORTANT]  
+> Before Running ```setup-gr00t.sh``` make sure to have the new ```pyproject.toml``` at the home folder.
+
+The [Isaac-GR00T](https://github.com/NVIDIA/Isaac-GR00T) has some dependencies that need to pay attention so it works with LeRobot.
 
 ```bash
-scp pyproject.toml test-g6e-8xlarge-2eb89f:~
+scp pyproject.toml test-g6e-8xlarge-51b10e:~
 ```
 
-Delete and change the pyproject.toml
+The script ```setup-gr00t.sh``` should ahndle it automatically but you can also manually delete and change the pyproject.toml
 
 ```bash
 # Delete original pyproject.toml
@@ -30,7 +34,9 @@ sudo rm -f ~/Isaac-GR00T/pyproject.toml
 scp pyproject.toml test-g6e-8xlarge-2eb89f:~/Isaac-GR00T
 ```
 
-Copy the Modality.json
+Test the Isaac-GR00T Training
+
+Copy the Modality.json into the folder: ```~/Isaac-GR00T/demo_data/leisaac-pick-orange/meta/```
 
 ```bash
 # Get sample Dataset leisaac-pick-orange
@@ -40,11 +46,19 @@ hf download --repo-type dataset LightwheelAI/leisaac-pick-orange --local-dir ./d
 scp so100_dualcam__modality.json test-g6e-8xlarge-2eb89f:~/Isaac-GR00T/demo_data/leisaac-pick-orange/meta/modality.json
 ```
 
-54.175.214.162
+Connect to instance using VNC must first get the IP:
+
+```bash
+curl ifconfig.me
+```
+
+test-g6e-8xlarge-51b10e
+
+54.175.143.149
 
 http://<instance-public-ip>:6080/vnc.html
 
-http://54.175.214.162:6080/vnc.html
+http://54.175.143.149:6080/vnc.html
 
 
 ## Notes
