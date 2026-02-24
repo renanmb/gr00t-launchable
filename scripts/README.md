@@ -43,7 +43,7 @@ Copy the Modality.json into the folder: ```~/Isaac-GR00T/demo_data/leisaac-pick-
 hf download --repo-type dataset LightwheelAI/leisaac-pick-orange --local-dir ./demo_data/leisaac-pick-orange
 
 # Copy the Modality.json to leisaac-pick-orange/meta
-scp so100_dualcam__modality.json test-g6e-8xlarge-2eb89f:~/Isaac-GR00T/demo_data/leisaac-pick-orange/meta/modality.json
+scp so100_dualcam__modality.json test-g6e-8xlarge-51b10e:~/Isaac-GR00T/demo_data/leisaac-pick-orange/meta/modality.json
 ```
 
 Connect to instance using VNC must first get the IP:
@@ -54,11 +54,11 @@ curl ifconfig.me
 
 test-g6e-8xlarge-51b10e
 
-54.175.143.149
+3.81.117.20
 
 http://<instance-public-ip>:6080/vnc.html
 
-http://54.175.143.149:6080/vnc.html
+http://3.81.117.20:6080/vnc.html
 
 
 ## Notes
