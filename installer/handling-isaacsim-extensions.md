@@ -4,14 +4,19 @@ Regardless of the method to install the dependencies on IsaacSim (Omniverse kit 
 
 Not Version locking can cause all sort of hell.
 
-Solution:
-
-1. Using **omni.kit.pipapi** works
 
 
+There are a couple of Ways of Handling the IsaacSim Sim Python Packages:
+
+- Runtime installation using **omni.kit.pipapi**
+- Build-time installation using **repo_build**
+
+Additionaly IsaacLab uses setuptools in **Setup.py** 
 
 
-THe issue that if the IsaacSim extension has an extra dependency such as ONNX or ONNXRUNTIME we have to install it directly on IsaacSim Python WHeel.
+Reviewing the Issue
+
+The issue that if the IsaacSim extension has an extra dependency such as ONNX or ONNXRUNTIME we have to install it directly on IsaacSim Python WHeel.
 
 Using the
 
@@ -19,100 +24,16 @@ Using the
 ./python.sh -m pip install onnxruntime onnx
 ```
 
-The Omniverse extensions as descrivbed in the isaaclab have a setup.py to install external dependencies but Omniverse kit apps and IsacSim as such has extra things that might create issues.
+**Solution:**
 
-```toml
-[dependencies]
-# 1. Ensure the pip manager loads first
-"omni.kit.pipapi" = {} 
-
-[python.pipapi]
-# 2. List your required packages
-requirements = [
-    "onnx",
-    "onnxruntime" 
-]
-# 3. CRITICAL: Allow Omniverse to download from the internet (PyPI)
-use_online_index = true
-```
-
-We could add the dependency in the extension.toml and hopefully this works
+1. Using **omni.kit.pipapi** works
 
 
-Ensure two things are present in your ```config/extension.toml``` file:
+## IsaacLab Special way of handling Extensions
 
-1. A dependency on the pip API: Omniverse needs to load its internal pip manager before it loads your extension.
+IsaacLab is using setuptools on top of the IsaacSim methods of handling the pip packages to simplify the complexity.
 
-2. The pip API configuration: This dictates what packages to download and gives permission to go online.
-
-
-Further Insights (**Troubleshooting**)
-
-If you already had a similar setup and it wasn't working, it is likely due to one of these common Omniverse quirks:
-
-- Missing use_online_index = true: By default, Omniverse tries to look for local pre-bundled .whl files. If this flag is missing or set to false, it will never attempt to download ONNX from PyPI.
-
-- The "Silent Cache" Failure: If an installation failed midway (e.g., due to a timeout or a missing index flag), Omniverse writes to a .install_cache.json file in its hidden pip3-envs folder. Once that file is updated, Omniverse thinks it has already handled the package and will not try again, even if you fix your extension.toml.
-
-    - The Fix: You can force Omniverse to clear its cache and retry by launching Isaac Sim from your terminal and appending the --clear-data flag to the launch command.
-
-- No App Restart: You must completely close and restart the Isaac Sim application after modifying the extension.toml. Simply disabling and re-enabling the extension in the UI is usually not enough to trigger the pip installer.
-
-Failed attempt
-
-```python
-# Auto install onnxruntime
-import subprocess
-import sys
-
-def install_onnx():
-    # Use sys.executable to ensure we use the Python inside python.sh
-    # We also clear PYTHONPATH temporarily to stop it from looking at your Conda folders
-    env = os.environ.copy()
-    env.pop("PYTHONPATH", None) 
-    
-    print("Installing onnxruntime specifically for Isaac Sim...")
-    try:
-        subprocess.check_call(
-            [sys.executable, "-m", "pip", "install", "onnxruntime"],
-            env=env
-        )
-        print("Installation finished.")
-    except Exception as e:
-        print(f"Failed to install: {e}")
-
-try:
-    import onnxruntime as ort
-except ImportError:
-    install_onnx()
-    # Force a re-search of the site-packages after installation
-    import importlib
-    import site
-    importlib.reload(site)
-    import onnxruntime as ort
-# Auto install onnxruntime
-```
-
-Trying again:
-
-```python
-# Auto install onnxruntime
-try:
-    import onnxruntime as ort
-except ImportError:
-    import omni.kit.pipapi
-    omni.kit.pipapi.install(
-        package="onnxruntime",
-        version="1.20.0", # Specify the version to ensure stability
-        ignore_cache=False,
-        use_online_index=True
-    )
-    import onnxruntime as ort
-# Auto install onnxruntime
-```
-
-
-## Using Setuptools like
+### Using Setuptools like
 
 The IsaacLab Documentation comments about using Setuptools to install any outsdanding Python package.
 
@@ -217,6 +138,8 @@ setup(
 
 ## Omniverse Kit Doc recommendations
 
+This is the IsaacSim Way.
+
 According to the documentation for Omniverse Kit, they mention a different approach to install the Python Packages.
 
 - [Using Python pip Packages](https://docs.omniverse.nvidia.com/kit/docs/kit-manual/latest/guide/using_pip_packages.html)
@@ -241,7 +164,7 @@ This method has issues:
 
 Even if the version is locked, which should always be the case, the package can still become unavailable at some point, or the content could change.
 
-Example 1
+**Example 1:**
 
 ```python
 # Package name and module can be different (although rarely is in practice):
@@ -250,7 +173,7 @@ omni.kit.pipapi.install("Pillow", module="PIL")
 import PIL
 ```
 
-Example 2
+**Example 2:**
 
 ```python
 # PIP/Install pip package
@@ -282,6 +205,8 @@ print(ver)
 
 ### Build-time installation using repo_build
 
+**Summary:** The repo_build is creating a prebundled python wheel to be attached to IsaacSim.
+
 The recommended way to install pip packages is at build time, and to embed it into an extension. 
 
 The **repo_build** tool, when run, can process special config file(s). 
@@ -308,8 +233,6 @@ It then hashes the whole config file and uploads the installed packages into pac
 On the next launch, it will download the uploaded package from packman, instead of using the pip index. 
 
 
-
-
 Finally, in the **extension.toml**, we need to make sure that this folder is added to ```sys.path```.
 
 ```toml
@@ -318,9 +241,117 @@ Finally, in the **extension.toml**, we need to make sure that this folder is add
 path = "pip_prebundle"
 ```
 
+#### Example Using repo_build
+
+The Wandelbots extension is an example where they had to prebundle python for the extension using the ```repo.sh``` part of IsaacSim.
+
+- [Wandelbots NOVA x NVIDIA Isaac Sim™ Extension](https://github.com/wandelbotsgmbh/wandelbots-isaacsim-extension)
+
+Older IsaacSim documentation has some notes and information on repo.sh:
+
+- [Isaac Sim App Template](https://github.com/isaac-sim/isaacsim-app-template)
+
+There are docs in:
+
+- [Usage and Troubleshooting](https://github.com/isaac-sim/isaacsim-app-template/blob/6c344c155b823ce3f5797fd21bc24fb8d90f5e11/readme-assets/additional-docs/usage_and_troubleshooting.md)
+- [IsaacSim App Templates](https://github.com/isaac-sim/isaacsim-app-template/tree/6c344c155b823ce3f5797fd21bc24fb8d90f5e11/templates/apps/isaacsim)
 
 
 
+
+## Failed Attempts
+
+The Omniverse extensions as descrivbed in the isaaclab have a setup.py to install external dependencies but Omniverse kit apps and IsacSim as such has extra things that might create issues.
+
+```toml
+[dependencies]
+# 1. Ensure the pip manager loads first
+"omni.kit.pipapi" = {} 
+
+[python.pipapi]
+# 2. List your required packages
+requirements = [
+    "onnx",
+    "onnxruntime" 
+]
+# 3. CRITICAL: Allow Omniverse to download from the internet (PyPI)
+use_online_index = true
+```
+
+We could add the dependency in the extension.toml and hopefully this works
+
+
+Ensure two things are present in your ```config/extension.toml``` file:
+
+1. A dependency on the pip API: Omniverse needs to load its internal pip manager before it loads your extension.
+
+2. The pip API configuration: This dictates what packages to download and gives permission to go online.
+
+
+Further Insights (**Troubleshooting**)
+
+If you already had a similar setup and it wasn't working, it is likely due to one of these common Omniverse quirks:
+
+- Missing use_online_index = true: By default, Omniverse tries to look for local pre-bundled .whl files. If this flag is missing or set to false, it will never attempt to download ONNX from PyPI.
+
+- The "Silent Cache" Failure: If an installation failed midway (e.g., due to a timeout or a missing index flag), Omniverse writes to a .install_cache.json file in its hidden pip3-envs folder. Once that file is updated, Omniverse thinks it has already handled the package and will not try again, even if you fix your extension.toml.
+
+    - The Fix: You can force Omniverse to clear its cache and retry by launching Isaac Sim from your terminal and appending the --clear-data flag to the launch command.
+
+- No App Restart: You must completely close and restart the Isaac Sim application after modifying the extension.toml. Simply disabling and re-enabling the extension in the UI is usually not enough to trigger the pip installer.
+
+Failed attempt
+
+```python
+# Auto install onnxruntime
+import subprocess
+import sys
+
+def install_onnx():
+    # Use sys.executable to ensure we use the Python inside python.sh
+    # We also clear PYTHONPATH temporarily to stop it from looking at your Conda folders
+    env = os.environ.copy()
+    env.pop("PYTHONPATH", None) 
+    
+    print("Installing onnxruntime specifically for Isaac Sim...")
+    try:
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", "onnxruntime"],
+            env=env
+        )
+        print("Installation finished.")
+    except Exception as e:
+        print(f"Failed to install: {e}")
+
+try:
+    import onnxruntime as ort
+except ImportError:
+    install_onnx()
+    # Force a re-search of the site-packages after installation
+    import importlib
+    import site
+    importlib.reload(site)
+    import onnxruntime as ort
+# Auto install onnxruntime
+```
+
+Trying again:
+
+```python
+# Auto install onnxruntime
+try:
+    import onnxruntime as ort
+except ImportError:
+    import omni.kit.pipapi
+    omni.kit.pipapi.install(
+        package="onnxruntime",
+        version="1.20.0", # Specify the version to ensure stability
+        ignore_cache=False,
+        use_online_index=True
+    )
+    import onnxruntime as ort
+# Auto install onnxruntime
+```
 
 
 

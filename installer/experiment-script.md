@@ -201,6 +201,70 @@ This needs to review
 (sudo crontab -l 2>/dev/null; echo "@reboot /bin/bash $(realpath your_script.sh) >> /root/install_output.log 2>&1") | sudo crontab -
 ```
 
+## Installer fails to get LeIsaac
+
+
+Running the script twice there is no safeguard or logic to fix the install process.
+
+```bash
+/tmp/tmpfcuw05kb: line 18: isaaclab: command not found
+ERROR conda.cli.main_run:execute(142): `conda run isaaclab -i` failed. (See above for error)
+```
+
+The Scripts is not installing LeIsaac Properly, I t creates the Conda Virtual Environment but it failed to properly install the module IsaacLab and it could not therefore run LeIsaac.
+
+Manual installation works, so the issue is the script being inconsistent.
+
+
+These are the steps causing inonsistencies:
+
+```bash
+############################
+# ISAACLAB CONDA SETUP
+############################
+# This assumes IsaacLab is already cloned in the home directory
+log "Initializing IsaacLab Conda environment: ${CONDA_ENV_NAME}"
+
+if [ -d "$HOME_DIR/IsaacLab" ]; then
+    # Run the IsaacLab conda setup script as the user
+    sudo -u "$ANSIBLE_USER" -i bash -c "cd $HOME_DIR/IsaacLab && ./isaaclab.sh --conda $CONDA_ENV_NAME"
+else
+    log "ERROR: IsaacLab directory not found at $HOME_DIR/IsaacLab. Please clone it first."
+    exit 1
+fi
+
+############################
+# LEISAAC SETUP --- This uses custom repo
+############################
+log "Cloning LeIsaac (${LEISAAC_VERSION})"
+if [ ! -d "$HOME_DIR/leisaac" ]; then
+    sudo -u "$ANSIBLE_USER" git clone --recursive https://github.com/renanmb/leisaac.git "$HOME_DIR/leisaac"
+    cd "$HOME_DIR/leisaac"
+    sudo -u "$ANSIBLE_USER" git checkout "$LEISAAC_VERSION"
+fi
+
+############################
+# INSTALLATION
+############################
+log "Installing LeIsaac and GR00T dependencies"
+
+# Using 'conda run' ensures we are in the correct env context without needing to 'source' conda.sh
+sudo -u "$ANSIBLE_USER" -i conda run -n "$CONDA_ENV_NAME" --cwd "$HOME_DIR/leisaac" \
+    pip install -e source/leisaac
+
+log "Installing optional GR00T dependencies"
+sudo -u "$ANSIBLE_USER" -i conda run -n "$CONDA_ENV_NAME" --cwd "$HOME_DIR/leisaac" \
+    pip install -e "source/leisaac[gr00t]"
+
+############################
+# VERIFICATION
+############################
+log "Verifying installation"
+sudo -u "$ANSIBLE_USER" -i conda run -n "$CONDA_ENV_NAME" isaaclab -i
+
+log "LeIsaac setup completed successfully."
+```
+
 
 ## Debugging tricks
 
