@@ -4,7 +4,7 @@ Start locking the scripts that work
 
 Instance Name: 
 
-test-g6e-8xlarge-51b10e
+test-g6e-8xlarge-584b80
 
 ```bash
 scp installer_v0.sh setup-novnc.sh setup-conda.sh setup-isaacsim.sh setup-isaaclab.sh setup-gr00t.sh setup-leisaac.sh xorg.conf vdisplay.edid x11vnc-ubuntu.service novnc.service test-g6e-8xlarge-51b10e:~
@@ -52,13 +52,13 @@ Connect to instance using VNC must first get the IP:
 curl ifconfig.me
 ```
 
-test-g6e-8xlarge-51b10e
+test-g6e-8xlarge-584b80
 
-3.81.117.20
+54.145.206.94
 
 http://<instance-public-ip>:6080/vnc.html
 
-http://3.81.117.20:6080/vnc.html
+http://54.145.206.94:6080/vnc.html
 
 
 ## Notes

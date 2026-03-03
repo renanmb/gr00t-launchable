@@ -121,6 +121,8 @@ Copy the Modality.json
 hf download --repo-type dataset LightwheelAI/leisaac-pick-orange --local-dir ./demo_data/leisaac-pick-orange
 # Copy the Modality.json to leisaac-pick-orange/meta
 scp so100_dualcam__modality.json test-g6e-8xlarge-65964e:~/Isaac-GR00T/demo_data/leisaac-pick-orange/meta/modality.json
+# Copy from the repository to target
+cp -a so100_dualcam__modality.json ~/Isaac-GR00T/demo_data/leisaac-pick-orange/meta/modality.json
 ```
 
 ## Step-4 --- Install LeIsaac

@@ -201,7 +201,7 @@ This needs to review
 (sudo crontab -l 2>/dev/null; echo "@reboot /bin/bash $(realpath your_script.sh) >> /root/install_output.log 2>&1") | sudo crontab -
 ```
 
-## Installer fails to get LeIsaac
+## Installer fails in the Stage to get LeIsaac
 
 
 Running the script twice there is no safeguard or logic to fix the install process.
@@ -274,6 +274,10 @@ Find the Log File globally:
 sudo find / -name "install_progress.log" 2>/dev/null
 ```
 
+It should be located at: 
+
+```/var/log/install_progress.log```
+
 Check if the script is actually running right now
 
 ```bash
@@ -284,4 +288,129 @@ To see the current stage:
 
 ```bash
 sudo cat /root/install_progress.log
+```
+
+## Installer V2 issue
+
+Thhis will verify if the script is currently running:
+
+```bash
+ps aux | grep installer_v2.sh
+```
+
+This will run in verbose
+
+```bash
+sudo bash -x /home/ubuntu/installer_v2.sh
+```
+
+### Quick Recommendation
+
+**Summary:** Need to add sleep to wait maybe disk is not mounted properly, on top of that might want to add a logic to try again
+
+Since you're on a Brev.dev or cloud instance, sometimes the disk isn't fully mounted when @reboot triggers. Try adding a "sleep" to your crontab entry to give the system 30 seconds to breathe before starting:
+
+
+```txt
+@reboot sleep 30 && /bin/bash /home/ubuntu/installer_v2.sh >> /var/log/install_output.log 2>&1
+```
+
+**Option 1:** The "Crontab-Only" Retry Logic
+
+```bash
+@reboot sleep 30; for i in {1..5}; do /bin/bash /home/ubuntu/installer_v2.sh >> /var/log/install_output.log 2>&1 && break || sleep 60; done
+```
+
+What this does:
+
+- ```sleep 30```: Gives the system its initial "breather."
+
+- ```for i in {1..5}```: Attempts to run the script up to 5 times.
+
+- ```&& break```: If the script finishes successfully (Exit Code 0), the loop stops immediately.
+
+- ```|| sleep 60```: If the script fails (Exit Code 1+), it waits 60 seconds before trying again.
+
+
+**Option 2:** The "Internal Guard" (Inside the Script)
+
+If you want to keep the crontab clean, it's actually better to add a System Readiness Check at the very top of your installer_v2.sh script. This ensures the script itself won't proceed until the environment is "sane."
+
+Add this to the top of installer_v2.sh:
+
+```bash
+# --- System Readiness Guard ---
+# Wait for the network or a specific directory to be available
+echo "Checking system readiness..." >> /var/log/install_output.log
+
+MAX_RETRIES=10
+RETRY_COUNT=0
+
+while [ ! -d "/home/ubuntu" ] || [ $RETRY_COUNT -lt 1 ]; do
+    if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+        echo "System not ready after $MAX_RETRIES attempts. Exiting." >> /var/log/install_output.log
+        exit 1
+    fi
+    echo "Waiting for environment... (Attempt $((RETRY_COUNT+1)))" >> /var/log/install_output.log
+    sleep 20
+    RETRY_COUNT=$((RETRY_COUNT+1))
+    
+    # Check if we can actually reach the internet (optional but recommended)
+    if ping -c 1 8.8.8.8 > /dev/null 2>&1; then
+        echo "Network and Disk are ready!" >> /var/log/install_output.log
+        break
+    fi
+done
+```
+
+**Option 3:** Use Systemd (The "Industry Standard" way)
+
+Personally prefer the Systemd approach but this can create issues since this is a temporary script.
+
+If crontab continues to be flaky, it's because crontab has no "dependency awareness." Systemd allows you to say "don't start this script until the network and local filesystems are fully online."
+
+1. Create a service file: sudo nano /etc/systemd/system/installer.service
+
+2. Paste this:
+
+```TOML
+Description=Auto Installer
+After=network-online.target multi-user.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/ubuntu
+ExecStart=/bin/bash /home/ubuntu/installer_v2.sh
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target
+```
+
+3. Enable it:
+
+```bash
+sudo systemctl enable installer.service
+sudo systemctl start installer.service
+```
+
+Why this is better:
+
+It waits for the network automatically.
+
+The Restart=on-failure logic means if the script crashes, Systemd will just keep restarting it every 30 seconds forever until it succeeds.
+
+## Aditional Error setting up LeIsaac
+
+There is an recurring issue that IsaacLab is not being properly installed within Leisaac, this needs review as this can create issues in making reliable scripts that will install everything.
+
+```bash
+(leisaac) ubuntu@brev-8skjziszx:~/leisaac$ python scripts/evaluation/policy_inference.py --task=LeIsaac-SO101-PickOrange-v0 --eval_rounds=10 --policy_type=gr00tn1.6 --policy_host=127.0.0.0 --policy_port=5555 --policy_timeout_ms=5000 --policy_action_horizon=16 --policy_language_instruction="Pick up the orange and place it on the plate" --device=cuda --enable_cameras
+Traceback (most recent call last):
+  File "/home/ubuntu/leisaac/scripts/evaluation/policy_inference.py", line 10, in <module>
+    from isaaclab.app import AppLauncher
+ModuleNotFoundError: No module named 'isaaclab'
 ```

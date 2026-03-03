@@ -76,6 +76,11 @@ run_leisaac() {
 sudo touch "$OUTPUT_LOG" "$STATUS_LOG"
 add_to_cron
 
+# Initialize status if empty
+if [ ! -s "$STATUS_LOG" ]; then
+    echo "stage_novnc" | sudo tee "$STATUS_LOG" > /dev/null
+fi
+
 while true; do
     CURRENT_STATUS="$(cat "$STATUS_LOG")"
 
