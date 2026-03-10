@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# setup-novnc_v3.sh
+
+# Version 04 (Repo-Aware)
+
 ############################
 # CONFIG
 ############################
 ANSIBLE_USER="ubuntu"
 HOME_DIR="/home/${ANSIBLE_USER}"
 NEEDS_REBOOT=0
+
+# Dynamically find the repository directory where this script lives
+REPO_DIR="$(dirname "$(readlink -f "$0")")"
 
 ############################
 # HELPERS
@@ -110,8 +115,9 @@ need_reboot
 ############################
 log "Installing X11 virtual display files"
 
-install -m 0644 vdisplay.edid /etc/X11/vdisplay.edid
-install -m 0644 xorg.conf /etc/X11/xorg.conf
+# Use REPO_DIR to safely locate these files
+install -m 0644 "$REPO_DIR/vdisplay.edid" /etc/X11/vdisplay.edid
+install -m 0644 "$REPO_DIR/xorg.conf" /etc/X11/xorg.conf
 need_reboot
 
 log "Ensuring .Xauthority exists"
@@ -179,7 +185,8 @@ pip3 install --upgrade pexpect
 # X11VNC SERVICE
 ############################
 log "Installing x11vnc systemd service"
-install -m 0444 x11vnc-ubuntu.service /etc/systemd/system/x11vnc-ubuntu.service
+# Use REPO_DIR to safely locate this file
+install -m 0444 "$REPO_DIR/x11vnc-ubuntu.service" /etc/systemd/system/x11vnc-ubuntu.service
 
 systemctl daemon-reload
 systemctl enable --now x11vnc-ubuntu
@@ -190,7 +197,8 @@ systemctl enable --now x11vnc-ubuntu
 log "Installing noVNC"
 snap install novnc
 
-install -m 0444 novnc.service /etc/systemd/system/novnc.service
+# Use REPO_DIR to safely locate this file
+install -m 0444 "$REPO_DIR/novnc.service" /etc/systemd/system/novnc.service
 
 systemctl daemon-reload
 systemctl enable --now novnc

@@ -11,7 +11,7 @@ scp installer_v0.sh setup-novnc.sh setup-conda.sh setup-isaacsim.sh setup-isaacl
 ```
 
 ```bash
-chmod +x installer_v0.sh setup-novnc.sh setup-conda.sh setup-isaacsim.sh setup-isaaclab.sh setup-gr00t.sh setup-leisaac.sh
+chmod +x installer.sh setup-novnc.sh setup-conda.sh setup-isaacsim.sh setup-isaaclab.sh setup-gr00t.sh setup-leisaac.sh
 ```
 
 
