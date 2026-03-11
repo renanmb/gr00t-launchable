@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# install-conda_v3.sh (Bulletproof Edition)
+# install-conda_v4.sh (Bulletproof & Crontab-Safe Edition)
 
 # -----------------------------------------------------------------------------
 # Config
@@ -35,7 +35,7 @@ if [[ -x "${CONDA_DIR}/bin/conda" ]]; then
 else
   log "Conda executable not found, proceeding with installation."
 
-  # --- NEW: Safely wipe corrupted/partial directory before installing ---
+  # --- Safely wipe corrupted/partial directory before installing ---
   if [[ -d "${CONDA_DIR}" ]]; then
     log "Found incomplete Conda directory. Removing ${CONDA_DIR} for a clean slate..."
     rm -rf "${CONDA_DIR}"
@@ -60,7 +60,7 @@ fi
 
 log "Conda installed at ${CONDA_DIR}"
 
-# --- NEW: Hand ownership to target user so they can install packages ---
+# --- Hand ownership to target user so they can install packages ---
 log "Setting ownership of ${CONDA_DIR} to ${TARGET_USER}"
 chown -R "${TARGET_USER}:${TARGET_USER}" "${CONDA_DIR}"
 
@@ -83,8 +83,10 @@ chmod 644 "${PROFILE_SCRIPT}"
 # -----------------------------------------------------------------------------
 log "Initializing conda for user '${TARGET_USER}'"
 
-sudo -u "${TARGET_USER}" bash <<'EOF'
+# --- NEW: Added -H flag to set $HOME properly ---
+sudo -H -u "${TARGET_USER}" bash <<'EOF'
 set -e
+cd "$HOME" # --- NEW: Escape the /root directory
 
 # Ensure profile.d is loaded
 source /etc/profile || true
@@ -102,8 +104,10 @@ EOF
 # -----------------------------------------------------------------------------
 log "Final verification as ${TARGET_USER}"
 
-sudo -u "${TARGET_USER}" bash <<'EOF'
+# --- NEW: Added -H flag to set $HOME properly ---
+sudo -H -u "${TARGET_USER}" bash <<'EOF'
 set -e
+cd "$HOME" # --- NEW: Escape the /root directory
 source /etc/profile.d/conda.sh
 conda --version
 EOF

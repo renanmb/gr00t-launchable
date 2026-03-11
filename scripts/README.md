@@ -58,7 +58,7 @@ test-g6e-8xlarge-584b80
 
 http://<instance-public-ip>:6080/vnc.html
 
-http://13.221.50.42:6080/vnc.html
+http://54.174.144.160:6080/vnc.html
 
 
 ## Notes
@@ -66,3 +66,38 @@ http://13.221.50.42:6080/vnc.html
 The LeIsaac script needs attention to which repo using since it needs to decouple LEROBOT dependency
 
 The GR00T repo needs to make sure the pyproject.toml is correct. Might evaluate using a custom repo.
+
+**ATTENTION**
+
+Brev need a startup script that it runs after it clones, it might be unreliable:
+
+```bash
+#!/bin/bash
+
+# Navigate to the scripts directory
+cd ~/goat_racer_collab/brev-launchable-scripts || { echo "Directory not found!"; exit 1; }
+
+# List of scripts to make executable
+scripts=(
+    "installer.sh"
+    "setup-novnc.sh"
+    "setup-conda.sh"
+    "setup-isaacsim.sh"
+    "setup-isaaclab.sh"
+    "setup-gr00t.sh"
+    "setup-leisaac.sh"
+)
+
+# Make each script executable
+for script in "${scripts[@]}"; do
+    if [ -f "$script" ]; then
+        chmod +x "$script"
+        echo "Made $script executable"
+    else
+        echo "Warning: $script not found"
+    fi
+done
+
+# Run the installer
+./installer.sh
+```
