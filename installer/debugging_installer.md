@@ -7,6 +7,9 @@ Using the Logs to find issues:
 ```bash
 cat /var/log/install_output.log
 
+# Check the Stage
+cat /var/log/install_progress.log
+
 # Rewind the progress bookmark back to Conda
 echo "stage_conda" | sudo tee /var/log/install_progress.log
 ```
@@ -407,4 +410,104 @@ Cloning into '/home/ubuntu/IsaacLab'...
 'unknown': I need something more specific.
 ❌ setup-isaaclab.sh encountered a fatal error!
 Halting master installer.
+```
+
+The Error is happening at:
+
+```bash
+# 4. Create environment if it doesn't exist (or was just wiped)
+if [ "\$ENV_HEALTHY" = false ]; then
+  echo "▶ Creating conda environment: $CONDA_ENV_NAME"
+  ./isaaclab.sh --conda "$CONDA_ENV_NAME"
+fi
+```
+
+**My reflection of what might be happening**
+
+The ```setup-isaaclab.sh``` script executes a subshell as the ```ubuntu``` user. Even though it sources ```/opt/conda/etc/profile.d/conda.sh```, that file only sets the ```PATH```; it does not necessarily set the ```SHELL``` variable that the ```isaaclab.sh``` wrapper script expects for its internal logic.
+
+Since the script requires an initialized shell to run ```./isaaclab.sh --conda```, and that initialization **only becomes "active" after a shell restart**, the script fails on the first pass.
+
+So a solution might be to perform a second pass, another shell restart or a complete reboot of the machine.
+
+**Option 1: Process Restart**
+
+Using ```exec``` to replace the current process with a brand-new bash instance.
+
+```bash
+run_isaaclab() {
+    echo ">>> Starting Step 4: Isaac Lab Installation"
+    
+    # Run the setup script
+    if sudo SHELL=/bin/bash bash "$BASE_DIR/setup-isaaclab.sh"; then
+        # ... (Verification logic) ...
+        update_status "stage_gr00t"
+    else
+        echo "⚠️ Environment initialization failed. Relaunching installer to refresh shell..."
+        sleep 2
+        # RESTART: This relaunch picks up from 'stage_isaaclab' due to the log status
+        exec /bin/bash "$SCRIPT_PATH"
+    fi
+}
+```
+
+**Option 2: System Reboot**
+
+```bash
+run_isaaclab() {
+    echo ">>> Starting Step 4: Isaac Lab Installation"
+    
+    # Check if a 'reboot flag' file exists to prevent infinite reboot loops
+    if [ ! -f "/tmp/isaaclab_rebooted" ]; then
+        echo "▶ Performing pre-install system reboot to ensure Conda/X11 readiness..."
+        touch "/tmp/isaaclab_rebooted"
+        sudo reboot
+        exit 0
+    fi
+
+    # After reboot, the script resumes here
+    if sudo SHELL=/bin/bash bash "$BASE_DIR/setup-isaaclab.sh"; then
+        rm -f "/tmp/isaaclab_rebooted"
+        update_status "stage_gr00t"
+    else
+        echo "❌ Step 4 failed even after reboot."
+        exit 1
+    fi
+}
+```
+
+**Option 3: Reboot after conda**
+
+This might work
+
+```bash
+run_conda() {
+    echo ">>> Starting Step 2: Conda Installation"
+    if sudo bash "$BASE_DIR/setup-conda.sh"; then
+        # Update status so it resumes at the NEXT step after rebooting
+        update_status "stage_isaacsim"
+        
+        echo "✅ Conda installed successfully. Rebooting to refresh shell environment..."
+        sleep 2
+        sudo reboot
+        exit 0 # Exit the current script instance
+    else
+        echo "❌ Step 2 Failed. Halting."
+        exit 1
+    fi
+}
+```
+
+Previously there is no reboot but it seems to fail to properly intialize because shell script is not interactive.
+
+```bash
+run_conda() {
+    echo ">>> Starting Step 2: Conda Installation"
+    if sudo bash "$BASE_DIR/setup-conda.sh"; then
+        update_status "stage_isaacsim"
+    else
+        echo "❌ Step 2 Failed. Halting."
+        exit 1
+    fi
+}
 ```

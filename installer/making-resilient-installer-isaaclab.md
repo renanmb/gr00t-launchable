@@ -1,5 +1,43 @@
 # The Setup IsaacLab Improvements
 
+test
+
+```bash
+isaaclab -p scripts/reinforcement_learning/rsl_rl/train.py --task=Isaac-Ant-v0 --headless
+
+isaaclab -p scripts/reinforcement_learning/rsl_rl/play.py --task=Isaac-Ant-v0 --num_envs 32
+```
+
+## experiment with a Launchable script
+
+The script runs, still same issue with the Stage IsaacLab stuck.
+
+```bash
+#!/bin/bash
+set -e
+
+# 1. Define where the repo will live
+WORKSPACE_DIR="/home/ubuntu" 
+REPO_NAME="gr00t-launchable"
+REPO_PATH="$WORKSPACE_DIR/$REPO_NAME"
+
+# 2. Navigate directly into the scripts directory
+echo "Navigating to scripts directory..."
+cd "$REPO_PATH/scripts"
+
+# 2. Make the installer executable
+chmod +x installer.sh setup-novnc.sh setup-conda.sh setup-isaacsim.sh setup-isaaclab.sh setup-gr00t.sh setup-leisaac.sh
+
+# 3. Run the installer
+echo "Executing installer.sh..."
+
+# Running it with nohup so it doesn't block the rest of the Brev setup process, 
+# and routing all output to a log file for easy debugging.
+nohup ./installer.sh > /home/ubuntu/installer_output.log 2>&1 &
+
+echo "=== Setup Launched Successfully ==="
+```
+
 
 ## Modified run_isaaclab with Retry Logic
 
@@ -71,3 +109,4 @@ echo "▶ Ensuring clean state for environment: $CONDA_ENV_NAME"
 sudo -H -u "$TARGET_USER" /opt/conda/bin/conda env remove -n "$CONDA_ENV_NAME" -y || true
 rm -rf "/opt/conda/envs/$CONDA_ENV_NAME"
 ```
+

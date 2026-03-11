@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# installer Version: 06 (Isaaclab Installer Retries Edition)
+# installer Version: 07 (Reboot After Conda Edition)
 
 # --- Configuration ---
 # Dynamically find the repository directory, no matter where it was cloned
@@ -46,7 +46,13 @@ run_novnc() {
 run_conda() {
     echo ">>> Starting Step 2: Conda Installation"
     if sudo bash "$BASE_DIR/setup-conda.sh"; then
+        # Update status so it resumes at the NEXT step after rebooting
         update_status "stage_isaacsim"
+        
+        echo "✅ Conda installed successfully. Rebooting to refresh shell environment..."
+        sleep 2
+        sudo reboot
+        exit 0 # Exit the current script instance
     else
         echo "❌ Step 2 Failed. Halting."
         exit 1

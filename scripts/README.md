@@ -56,10 +56,11 @@ test-g6e-8xlarge-584b80
 
 54.145.206.94
 
+
 http://<instance-public-ip>:6080/vnc.html
 
-http://34.203.211.225:6080/vnc.html
-
+http://3.85.189.44:6080/vnc.html
+http://54.175.162.144:6080/vnc.html
 
 ## Notes
 
