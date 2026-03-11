@@ -37,7 +37,7 @@ chown -R ubuntu:ubuntu /home/ubuntu/goat_racer_collab
 sudo bash /home/ubuntu/goat_racer_collab/brev-launchable-scripts/installer.sh >> /var/log/install_output.log 2>&1 &
 ```
 
-**Method 2: Using the Deploy Key**
+**Method 2: Using the Deploy Key** (This dont work at all no matter what)
 
 If you already generated an SSH Deploy key and prefer to use that, you can use a bash trick called a "Here-Doc" (cat << 'EOF'). This allows your script to "write" the key file to the new machine dynamically before trying to clone.
 

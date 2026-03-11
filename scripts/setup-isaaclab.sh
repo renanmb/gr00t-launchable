@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# setup-isaaclab_v6.sh (The Final Bulletproof Edition)
+# setup-isaaclab_v5.sh (Bulletproof & Crontab-Safe Edition)
 
 # -----------------------------------------------------------------------------
 # Config
@@ -43,17 +43,19 @@ apt-get install -y --no-install-recommends git cmake build-essential
 # -----------------------------------------------------------------------------
 # Repo & Symlink setup
 # -----------------------------------------------------------------------------
-# --- Escape the /root directory so cron doesn't trap Git ---
+# --- NEW: Escape the /root directory so cron doesn't trap Git ---
 cd "$TARGET_HOME"
 
 if [[ ! -d "$ISAACLAB_DIR/.git" ]]; then
   echo "▶ Cloning IsaacLab repository"
+  # --- NEW: Added -H flag ---
   sudo -H -u "$TARGET_USER" git clone https://github.com/isaac-sim/IsaacLab.git "$ISAACLAB_DIR"
 fi
 
 SYMLINK_PATH="$ISAACLAB_DIR/_isaac_sim"
 if [[ ! -L "$SYMLINK_PATH" ]]; then
   echo "▶ Creating _isaac_sim symlink"
+  # --- NEW: Added -H flag ---
   sudo -H -u "$TARGET_USER" ln -s "$ISAACSIM_PATH" "$SYMLINK_PATH"
 fi
 
@@ -62,10 +64,11 @@ fi
 # -----------------------------------------------------------------------------
 echo "▶ Setting up Conda and installing Isaac Lab extensions"
 
+# --- NEW: Added -H flag to properly set $HOME for Conda ---
 sudo -H -u "$TARGET_USER" bash <<EOF
 set -euo pipefail
 
-# --- Escape the /root directory inside the subshell ---
+# --- NEW: Escape the /root directory inside the subshell ---
 cd "$TARGET_HOME" 
 
 # 1. Load Conda
@@ -79,6 +82,7 @@ ENV_HEALTHY=false
 if conda env list | awk '{print \$1}' | grep -qx "$CONDA_ENV_NAME"; then
   echo "▶ Conda environment '$CONDA_ENV_NAME' exists. Checking health..."
   
+  # Test if the environment is actually functional by querying python
   if conda run -n "$CONDA_ENV_NAME" python --version &>/dev/null; then
     echo "▶ Environment is healthy."
     ENV_HEALTHY=true
@@ -88,10 +92,10 @@ if conda env list | awk '{print \$1}' | grep -qx "$CONDA_ENV_NAME"; then
   fi
 fi
 
-# 4. Create environment if it doesn't exist (FIXED EXTRA ARGUMENT)
+# 4. Create environment if it doesn't exist (or was just wiped)
 if [ "\$ENV_HEALTHY" = false ]; then
   echo "▶ Creating conda environment: $CONDA_ENV_NAME"
-  ./isaaclab.sh --conda 
+  ./isaaclab.sh --conda "$CONDA_ENV_NAME"
 fi
 
 # 5. Activate and Install
