@@ -6,6 +6,73 @@ Using the Logs to find issues:
 
 ```bash
 cat /var/log/install_output.log
+
+# Rewind the progress bookmark back to Conda
+echo "stage_conda" | sudo tee /var/log/install_progress.log
+```
+
+## Brev Launch Script
+
+**Method 1: The HTTPS Token Method**
+
+You can use a GitHub Personal Access Token (PAT). 
+
+1. Get a Token: Go to GitHub -> Settings -> Developer Settings -> Personal Access Tokens (Tokens (classic)). Generate a new token and give it ONLY the repo scope.
+2. Paste this into Brev:
+
+```bash
+#!/bin/bash
+set -e
+
+# 1. Clone the private repo using the token embedded in the HTTPS URL
+# Replace <YOUR_TOKEN> with your actual GitHub PAT
+# Replace <GITHUB_USER> with your username or org
+git clone https://<YOUR_TOKEN>@github.com/<GITHUB_USER>/goat_racer_collab.git /home/ubuntu/goat_racer_collab
+
+# 2. Fix ownership since the startup script runs as root
+chown -R ubuntu:ubuntu /home/ubuntu/goat_racer_collab
+
+# 3. Start your main installer script in the background!
+# (Adjust the path if your installer is inside a subfolder like /scripts)
+sudo bash /home/ubuntu/goat_racer_collab/brev-launchable-scripts/installer.sh >> /var/log/install_output.log 2>&1 &
+```
+
+**Method 2: Using the Deploy Key**
+
+If you already generated an SSH Deploy key and prefer to use that, you can use a bash trick called a "Here-Doc" (cat << 'EOF'). This allows your script to "write" the key file to the new machine dynamically before trying to clone.
+
+```bash
+#!/bin/bash
+set -e
+
+KEY_FILE="/root/.ssh/github_deploy_key"
+mkdir -p /root/.ssh
+
+# 1. Write the private key directly to the file system
+# Paste your ENTIRE private key between the EOF tags
+cat << 'EOF' > "$KEY_FILE"
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+QyNTUxOQAAACBAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+... (paste the rest of your private key here) ...
+-----END OPENSSH PRIVATE KEY-----
+EOF
+
+# 2. Secure the key file (SSH requires this)
+chmod 600 "$KEY_FILE"
+
+# 3. Clone the private repo using the key (Updated with Reality-Web-Services)
+GIT_SSH_COMMAND="ssh -i $KEY_FILE -o StrictHostKeyChecking=no -o IdentitiesOnly=yes" \
+git clone git@github.com:Reality-Web-Services/goat_racer_collab.git /home/ubuntu/goat_racer_collab
+
+# 4. Clean up the key file immediately for security
+rm -f "$KEY_FILE"
+
+# 5. Fix ownership so the ubuntu user can access the files
+chown -R ubuntu:ubuntu /home/ubuntu/goat_racer_collab
+
+# 6. Trigger your main installer in the background
+sudo bash /home/ubuntu/goat_racer_collab/brev-launchable-scripts/installer.sh >> /var/log/install_output.log 2>&1 &
 ```
 
 
@@ -39,6 +106,25 @@ When you use the command ```sudo -u ubuntu```, it successfully changes the user 
 - The ```-H``` Flag and ```cd```
 
 To fix this permanently across all your scripts, we must add the ```-H``` flag (```sudo -H -u ubuntu```), which stands for "Home". This forces ```sudo``` to rewrite the ```$HOME``` variable to the target user's actual home directory (```/home/ubuntu```). We also need to add a quick ```cd "$HOME"``` so the scripts physically move out of the ```/root``` folder before executing anything.
+
+Adter the changes are implemented run the following commands:
+
+```bash
+# 1. Stop the looping script
+sudo pkill -f installer.sh
+
+# 2. Delete the corrupted Conda folder to start totally fresh
+sudo rm -rf /opt/conda
+
+# 3. Delete the corrupted Isaac Sim folder (since post_install crashed)
+sudo rm -rf /home/ubuntu/isaacsim
+
+# 4. Rewind the progress bookmark back to Conda
+echo "stage_conda" | sudo tee /var/log/install_progress.log
+
+# 5. Kick off the fixed installation!
+sudo bash /home/ubuntu/gr00t-launchable/scripts/installer.sh &
+```
 
 
 1. Update setup-conda.sh
@@ -140,4 +226,24 @@ cd "$TARGET_HOME" # <--- NEW
 # 1. Load Conda
 source /opt/conda/etc/profile.d/conda.sh
 # ... (The rest of the script remains exactly the same)
+```
+
+
+## Brev Launchable Startup Script Issues
+
+Ubuntu cloud-initialization system (cloud-init) tried to execute your script, but it crashed instantly with a fatal error.
+
+```txt
+cc_scripts_per_boot.py[WARNING]: Failed to run module scripts_per_boot...
+cc_scripts_per_instance.py[WARNING]: Failed to run module scripts_per_instance...
+```
+
+We can use ```set -x``` turns on "Debug Mode". It tells Bash to print every single command to the log file right before it executes it, along with the exact error message
+
+```bash
+# Run this command to see the exact reason it failed:
+sudo grep -i "scripts_per_instance" /var/log/cloud-init.log -A 10
+
+# check all logs
+sudo cat /var/log/cloud-init-output.log
 ```
