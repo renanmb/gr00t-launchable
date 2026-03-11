@@ -27,7 +27,7 @@ set -e
 # 1. Clone the private repo using the token embedded in the HTTPS URL
 # Replace <YOUR_TOKEN> with your actual GitHub PAT
 # Replace <GITHUB_USER> with your username or org
-git clone https://<YOUR_TOKEN>@github.com/<GITHUB_USER>/goat_racer_collab.git /home/ubuntu/goat_racer_collab
+git clone https://<YOUR_TOKEN>@github.com/renanmb/goat_racer_collab.git /home/ubuntu/goat_racer_collab
 
 # 2. Fix ownership since the startup script runs as root
 chown -R ubuntu:ubuntu /home/ubuntu/goat_racer_collab
@@ -35,6 +35,24 @@ chown -R ubuntu:ubuntu /home/ubuntu/goat_racer_collab
 # 3. Start your main installer script in the background!
 # (Adjust the path if your installer is inside a subfolder like /scripts)
 sudo bash /home/ubuntu/goat_racer_collab/brev-launchable-scripts/installer.sh >> /var/log/install_output.log 2>&1 &
+```
+
+Second attempt at method 1
+
+```bash
+#!/bin/bash
+set -e
+
+echo "Cloning repository..."
+
+git clone https://USERNAME:TOKEN@github.com/ORG/goat_racer_collab.git /home/ubuntu/goat_racer_collab
+
+echo "Starting installer..."
+
+nohup bash /home/ubuntu/goat_racer_collab/brev-launchable-scripts/installer.sh \
+  >> /home/ubuntu/install_output.log 2>&1 &
+
+echo "Setup launched successfully."
 ```
 
 **Method 2: Using the Deploy Key** (This dont work at all no matter what)
@@ -317,4 +335,49 @@ sudo grep -i "scripts_per_instance" /var/log/cloud-init.log -A 10
 
 # check all logs
 sudo cat /var/log/cloud-init-output.log
+```
+
+
+
+## Error with the Installer
+
+```bash
+✅ Isaac Sim installed successfully for user 'ubuntu'
+Transitioning to stage_isaaclab at Wed Mar 11 17:25:05 UTC 2026
+Transitioning to stage_isaaclab at Wed Mar 11 17:25:05 UTC 2026
+>>> Starting Step 4: Isaac Lab Installation
+▶ Installing Isaac Lab for user: ubuntu
+▶ Installing system dependencies
+Hit:1 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy InRelease
+Hit:2 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates InRelease
+Hit:3 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports InRelease
+Hit:4 https://download.docker.com/linux/ubuntu jammy InRelease
+Hit:5 https://apt.grafana.com stable InRelease
+Hit:6 https://apt.corretto.aws stable InRelease
+Hit:7 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  InRelease
+Hit:8 https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64  InRelease
+Hit:9 https://fsx-lustre-client-repo.s3.amazonaws.com/ubuntu jammy InRelease
+Get:10 https://repos.influxdata.com/debian stable InRelease [6922 B]
+Hit:11 http://security.ubuntu.com/ubuntu jammy-security InRelease
+Fetched 6922 B in 1s (6105 B/s)
+Reading package lists...
+W: Target Packages (Packages) is configured multiple times in /etc/apt/sources.list.d/archive_uri-https_developer_download_nvidia_com_compute_cuda_repos_ubuntu2204_x86_64_-jammy.list:1 and /etc/apt/sources.list.d/cuda-ubuntu2204-x86_64.list:1
+W: Target Translations (en) is configured multiple times in /etc/apt/sources.list.d/archive_uri-https_developer_download_nvidia_com_compute_cuda_repos_ubuntu2204_x86_64_-jammy.list:1 and /etc/apt/sources.list.d/cuda-ubuntu2204-x86_64.list:1
+W: Target Packages (Packages) is configured multiple times in /etc/apt/sources.list.d/archive_uri-https_developer_download_nvidia_com_compute_cuda_repos_ubuntu2204_x86_64_-jammy.list:1 and /etc/apt/sources.list.d/cuda-ubuntu2204-x86_64.list:1
+W: Target Translations (en) is configured multiple times in /etc/apt/sources.list.d/archive_uri-https_developer_download_nvidia_com_compute_cuda_repos_ubuntu2204_x86_64_-jammy.list:1 and /etc/apt/sources.list.d/cuda-ubuntu2204-x86_64.list:1
+Reading package lists...
+Building dependency tree...
+Reading state information...
+build-essential is already the newest version (12.9ubuntu3).
+cmake is already the newest version (3.22.1-1ubuntu1.22.04.2).
+git is already the newest version (1:2.34.1-1ubuntu1.17).
+0 upgraded, 0 newly installed, 0 to remove and 9 not upgraded.
+▶ Cloning IsaacLab repository
+Cloning into '/home/ubuntu/IsaacLab'...
+▶ Creating _isaac_sim symlink
+▶ Setting up Conda and installing Isaac Lab extensions
+▶ Creating conda environment: isaaclab
+'unknown': I need something more specific.
+❌ setup-isaaclab.sh encountered a fatal error!
+Halting master installer.
 ```
