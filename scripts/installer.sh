@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# installer Version: 04 (Repo-Aware)
+# installer Version: 05 (Verification-Aware Edition)
 
 # --- Configuration ---
 # Dynamically find the repository directory, no matter where it was cloned
@@ -34,43 +34,82 @@ remove_from_cron() {
 
 run_novnc() {
     echo ">>> Starting Step 1: noVNC and Desktop Setup"
-    sudo bash "$BASE_DIR/setup-novnc.sh"
-    update_status "stage_conda"
-    exit 0 
+    if sudo bash "$BASE_DIR/setup-novnc.sh"; then
+        update_status "stage_conda"
+        exit 0 
+    else
+        echo "❌ Step 1 Failed. Halting."
+        exit 1
+    fi
 }
 
 run_conda() {
     echo ">>> Starting Step 2: Conda Installation"
-    sudo bash "$BASE_DIR/setup-conda.sh"
-    update_status "stage_isaacsim"
+    if sudo bash "$BASE_DIR/setup-conda.sh"; then
+        update_status "stage_isaacsim"
+    else
+        echo "❌ Step 2 Failed. Halting."
+        exit 1
+    fi
 }
 
 run_isaacsim() {
     echo ">>> Starting Step 3: Isaac Sim Installation"
-    sudo bash "$BASE_DIR/setup-isaacsim.sh"
-    update_status "stage_isaaclab"
+    if sudo bash "$BASE_DIR/setup-isaacsim.sh"; then
+        update_status "stage_isaaclab"
+    else
+        echo "❌ Step 3 Failed. Halting."
+        exit 1
+    fi
 }
 
 run_isaaclab() {
     echo ">>> Starting Step 4: Isaac Lab Installation"
-    sudo bash "$BASE_DIR/setup-isaaclab.sh"
-    if [ "$INSTALL_OPTIONAL" = true ]; then
-        update_status "stage_gr00t"
+    
+    # 1. Run the script and check its exit code
+    if sudo bash "$BASE_DIR/setup-isaaclab.sh"; then
+        echo ">>> Performing final verification of Isaac Lab Conda Environment..."
+        
+        # 2. Hard Verification: Ask the environment to import torch
+        if sudo -H -u ubuntu /opt/conda/bin/conda run -n isaaclab python -c "import torch" >/dev/null 2>&1; then
+            echo "✅ Isaac Lab successfully verified!"
+            
+            # Only transition if verification passes
+            if [ "$INSTALL_OPTIONAL" = true ]; then
+                update_status "stage_gr00t"
+            else
+                update_status "completed"
+            fi
+        else
+            echo "❌ Verification Failed: Conda environment 'isaaclab' is missing or broken!"
+            echo "Halting master installer."
+            exit 1
+        fi
     else
-        update_status "completed"
+        echo "❌ setup-isaaclab.sh encountered a fatal error!"
+        echo "Halting master installer."
+        exit 1
     fi
 }
 
 run_gr00t() {
     echo ">>> Starting Step 5: Isaac-GR00T Setup (Optional)"
-    sudo bash "$BASE_DIR/setup-gr00t.sh"
-    update_status "stage_leisaac"
+    if sudo bash "$BASE_DIR/setup-gr00t.sh"; then
+        update_status "stage_leisaac"
+    else
+        echo "❌ Step 5 Failed. Halting."
+        exit 1
+    fi
 }
 
 run_leisaac() {
     echo ">>> Starting Step 6: LeIsaac Setup (Optional)"
-    sudo bash "$BASE_DIR/setup-leisaac.sh"
-    update_status "completed"
+    if sudo bash "$BASE_DIR/setup-leisaac.sh"; then
+        update_status "completed"
+    else
+        echo "❌ Step 6 Failed. Halting."
+        exit 1
+    fi
 }
 
 # --- Main Logic ---
