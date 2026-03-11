@@ -75,6 +75,77 @@ chown -R ubuntu:ubuntu /home/ubuntu/goat_racer_collab
 sudo bash /home/ubuntu/goat_racer_collab/brev-launchable-scripts/installer.sh >> /var/log/install_output.log 2>&1 &
 ```
 
+Seconda attempt using the logger to debug
+
+```bash
+#!/bin/bash
+# Enable debug logging, do NOT exit on error
+set -x
+
+echo "--- STARTING BREV SETUP SCRIPT ---"
+
+KEY_FILE="/root/.ssh/github_deploy_key"
+mkdir -p /root/.ssh
+
+echo "Writing SSH key..."
+cat << 'EOF' > "$KEY_FILE"
+-----BEGIN OPENSSH PRIVATE KEY-----
+(PASTE YOUR PRIVATE KEY HERE)
+-----END OPENSSH PRIVATE KEY-----
+EOF
+
+echo "Setting permissions..."
+chmod 600 "$KEY_FILE"
+
+echo "Attempting to clone repository..."
+GIT_SSH_COMMAND="ssh -i $KEY_FILE -o StrictHostKeyChecking=no -o IdentitiesOnly=yes" \
+git clone git@github.com:Reality-Web-Services/goat_racer_collab.git /home/ubuntu/goat_racer_collab
+
+echo "Cleaning up key..."
+rm -f "$KEY_FILE"
+
+echo "Fixing ownership..."
+chown -R ubuntu:ubuntu /home/ubuntu/goat_racer_collab
+
+echo "Triggering installer..."
+sudo bash /home/ubuntu/goat_racer_collab/brev-launchable-scripts/installer.sh >> /var/log/install_output.log 2>&1 &
+
+echo "--- SCRIPT FINISHED ---"
+```
+
+Third Attempt 
+
+Using base64
+
+```bash
+#!/bin/bash
+set -e
+set -x
+
+# 1. We tell the script where to create the key file INSIDE the Brev machine
+KEY_FILE="/root/.ssh/github_deploy_key"
+mkdir -p /root/.ssh
+
+# 2. The script decodes your single-line string back into a real SSH file!
+# ---> REPLACE THE TEXT BELOW WITH YOUR BASE64 STRING <---
+echo "PASTE_YOUR_BASE64_STRING_HERE" | base64 --decode > "$KEY_FILE"
+
+# 3. Secure the newly created key file (SSH demands this)
+chmod 600 "$KEY_FILE"
+
+# 4. Use the key to clone your private repo
+GIT_SSH_COMMAND="ssh -i $KEY_FILE -o StrictHostKeyChecking=no -o IdentitiesOnly=yes" \
+git clone git@github.com:Reality-Web-Services/goat_racer_collab.git /home/ubuntu/goat_racer_collab
+
+# 5. Delete the key file from the Brev machine for security
+rm -f "$KEY_FILE"
+
+# 6. Fix ownership so the ubuntu user can access the repo
+chown -R ubuntu:ubuntu /home/ubuntu/goat_racer_collab
+
+# 7. Start your master installer script in the background!
+sudo bash /home/ubuntu/goat_racer_collab/brev-launchable-scripts/installer.sh >> /var/log/install_output.log 2>&1 &
+```
 
 
 ## Permissions issues when running
