@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# isaaclab_v3.sh
+# setup-isaaclab_v4.sh (Bulletproof Edition)
 
 # -----------------------------------------------------------------------------
 # Config
@@ -14,7 +14,7 @@ ISAACLAB_DIR="$WORKDIR/IsaacLab"
 CONDA_ENV_NAME="isaaclab"
 
 # -----------------------------------------------------------------------------
-# Root guard
+# Root guard & Pre-flight checks
 # -----------------------------------------------------------------------------
 if [[ "$EUID" -ne 0 ]]; then
   echo "❌ This script must be run as root (sudo)"
@@ -68,23 +68,51 @@ source /opt/conda/etc/profile.d/conda.sh
 # 2. Enter Repo Directory
 cd "$ISAACLAB_DIR"
 
-# 3. Create environment if it doesn't exist
-if ! conda env list | awk '{print \$1}' | grep -qx "$CONDA_ENV_NAME"; then
-  echo "▶ Creating conda environment: $CONDA_ENV_NAME"
-  ./isaaclab.sh --conda "$CONDA_ENV_NAME"
-else
-  echo "▶ Conda environment '$CONDA_ENV_NAME' already exists"
+# 3. Zombie Environment Guard
+ENV_HEALTHY=false
+if conda env list | awk '{print \$1}' | grep -qx "$CONDA_ENV_NAME"; then
+  echo "▶ Conda environment '$CONDA_ENV_NAME' exists. Checking health..."
+  
+  # Test if the environment is actually functional by querying python
+  if conda run -n "$CONDA_ENV_NAME" python --version &>/dev/null; then
+    echo "▶ Environment is healthy."
+    ENV_HEALTHY=true
+  else
+    echo "▶ Detected broken/incomplete environment! Removing for a clean slate..."
+    conda env remove -n "$CONDA_ENV_NAME" -y
+  fi
 fi
 
-# 4. Activate and Install
+# 4. Create environment if it doesn't exist (or was just wiped)
+if [ "\$ENV_HEALTHY" = false ]; then
+  echo "▶ Creating conda environment: $CONDA_ENV_NAME"
+  ./isaaclab.sh --conda "$CONDA_ENV_NAME"
+fi
+
+# 5. Activate and Install
 echo "▶ Activating environment and running installation"
-# Disable 'nounset' temporarily to prevent ZSH_VERSION errors
+# Disable 'nounset' temporarily to prevent Conda's internal ZSH_VERSION errors
 set +u
 conda activate "$CONDA_ENV_NAME"
 set -u
 
 # This runs the 'isaaclab' executable found within the repo
+echo "▶ Building extensions (This may take 10+ minutes)..."
 ./isaaclab.sh -i
+
+# 6. Post-Installation Health Check
+echo "▶ Running Post-Install Verification..."
+if python -c "import torch; print('PyTorch Version:', torch.__version__)" &>/dev/null; then
+    echo "✅ Verification Passed: PyTorch is successfully installed."
+else
+    echo "❌ Verification Failed: Python environment seems broken after installation."
+    exit 1
+fi
+
+# 7. Cleanup (Optional: Frees up gigabytes of cached tarballs)
+echo "▶ Cleaning up Conda package cache to save disk space..."
+conda clean --all -y > /dev/null
+
 EOF
 
 # -----------------------------------------------------------------------------
