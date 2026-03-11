@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# installer Version: 07 (Reboot After Conda Edition)
+# installer Version: 08 (using exec /bin/bash Edition)
 
 # --- Configuration ---
 # Dynamically find the repository directory, no matter where it was cloned
@@ -97,10 +97,15 @@ run_isaaclab() {
         # If we reached here, the first attempt failed or verification failed
         echo "⚠️ Attempt $ATTEMPT failed."
         if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
-            echo ">>> Sourcing Conda and retrying..."
-            # Force a refresh of the conda profile for the ubuntu user
+            echo ">>> Refreshing disk-level initialization..."
             sudo -H -u ubuntu bash -c "source /opt/conda/etc/profile.d/conda.sh && conda init bash" > /dev/null 2>&1
-            sleep 5
+            sleep 2
+        else
+            # --- THE EXEC SOLUTION ---
+            echo "❌ Max attempts reached. Relaunching script to force environment refresh..."
+            sleep 2
+            # This replaces the current stale script with a fresh, Conda-aware one
+            exec /bin/bash "$SCRIPT_PATH"
         fi
         ATTEMPT=$((ATTEMPT+1))
     done

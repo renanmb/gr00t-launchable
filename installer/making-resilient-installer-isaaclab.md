@@ -110,3 +110,51 @@ sudo -H -u "$TARGET_USER" /opt/conda/bin/conda env remove -n "$CONDA_ENV_NAME" -
 rm -rf "/opt/conda/envs/$CONDA_ENV_NAME"
 ```
 
+Trying the exec command
+
+```bash
+run_isaaclab() {
+    echo ">>> Starting Step 4: Isaac Lab Installation"
+    
+    local ATTEMPT=1
+    local MAX_ATTEMPTS=2
+
+    while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+        echo ">>> Installation Attempt $ATTEMPT of $MAX_ATTEMPTS..."
+        
+        # 1. Run the script
+        if sudo bash "$BASE_DIR/setup-isaaclab.sh"; then
+            echo ">>> Performing final verification of Isaac Lab Conda Environment..."
+            
+            # 2. Source conda and verify
+            if sudo -H -u ubuntu bash -c "source /opt/conda/etc/profile.d/conda.sh && conda run -n isaaclab python -c 'import torch'" >/dev/null 2>&1; then
+                echo "✅ Isaac Lab successfully verified!"
+                if [ "$INSTALL_OPTIONAL" = true ]; then
+                    update_status "stage_gr00t"
+                else
+                    update_status "completed"
+                fi
+                return 0
+            fi
+        fi
+
+        # If we reached here, the first attempt failed or verification failed
+        echo "⚠️ Attempt $ATTEMPT failed."
+        if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+            echo ">>> Refreshing disk-level initialization..."
+            sudo -H -u ubuntu bash -c "source /opt/conda/etc/profile.d/conda.sh && conda init bash" > /dev/null 2>&1
+            sleep 2
+        else
+            # --- THE EXEC SOLUTION ---
+            echo "❌ Max attempts reached. Relaunching script to force environment refresh..."
+            sleep 2
+            # This replaces the current stale script with a fresh, Conda-aware one
+            exec /bin/bash "$SCRIPT_PATH"
+        fi
+        ATTEMPT=$((ATTEMPT+1))
+    done
+
+    echo "❌ Step 4 Failed after $MAX_ATTEMPTS attempts. Halting."
+    exit 1
+}
+```

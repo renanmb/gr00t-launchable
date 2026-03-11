@@ -511,3 +511,29 @@ run_conda() {
     fi
 }
 ```
+
+```bash
+# 3. Zombie Environment Guard
+ENV_HEALTHY=false
+if conda env list | awk '{print \$1}' | grep -qx "$CONDA_ENV_NAME"; then
+  echo "▶ Conda environment '$CONDA_ENV_NAME' exists. Checking health..."
+  
+  # Test if the environment is actually functional by querying python
+  if conda run -n "$CONDA_ENV_NAME" python --version &>/dev/null; then
+    echo "▶ Environment is healthy."
+    ENV_HEALTHY=true
+  else
+    echo "▶ Detected broken/incomplete environment! Removing for a clean slate..."
+    conda env remove -n "$CONDA_ENV_NAME" -y
+  fi
+fi
+```
+
+
+```bash
+awk: cmd. line:1: {print \$1}
+awk: cmd. line:1:        ^ backslash not last character on line
+awk: cmd. line:1: {print \$1}
+awk: cmd. line:1:        ^ syntax error
+Exception ignored on flushing sys.stdout:
+```
