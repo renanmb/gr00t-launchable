@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# install-conda_v2.sh
+# install-conda_v3.sh (Bulletproof Edition)
 
 # -----------------------------------------------------------------------------
 # Config
@@ -28,12 +28,18 @@ if ! id "$TARGET_USER" &>/dev/null; then
 fi
 
 # -----------------------------------------------------------------------------
-# Idempotency check
+# Idempotency & Cleanup check
 # -----------------------------------------------------------------------------
 if [[ -x "${CONDA_DIR}/bin/conda" ]]; then
   log "Conda already installed at ${CONDA_DIR}, skipping install."
 else
-  log "Conda not found, proceeding with installation."
+  log "Conda executable not found, proceeding with installation."
+
+  # --- NEW: Safely wipe corrupted/partial directory before installing ---
+  if [[ -d "${CONDA_DIR}" ]]; then
+    log "Found incomplete Conda directory. Removing ${CONDA_DIR} for a clean slate..."
+    rm -rf "${CONDA_DIR}"
+  fi
 
   log "Downloading Miniforge installer..."
   wget -q -O "${INSTALLER_NAME}" "${INSTALLER_URL}" || fail "Download failed"
@@ -46,13 +52,17 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# Verify installation
+# Verify installation & Fix Permissions
 # -----------------------------------------------------------------------------
 if [[ ! -x "${CONDA_DIR}/bin/conda" ]]; then
   fail "Conda binary not found after installation"
 fi
 
 log "Conda installed at ${CONDA_DIR}"
+
+# --- NEW: Hand ownership to target user so they can install packages ---
+log "Setting ownership of ${CONDA_DIR} to ${TARGET_USER}"
+chown -R "${TARGET_USER}:${TARGET_USER}" "${CONDA_DIR}"
 
 # -----------------------------------------------------------------------------
 # System-wide PATH (CRITICAL)
@@ -80,7 +90,9 @@ set -e
 source /etc/profile || true
 
 # Initialize conda (safe to re-run)
+# Configure auto-yes to prevent frozen confirmation prompts
 if ! grep -q "conda initialize" "$HOME/.bashrc"; then
+  /opt/conda/bin/conda config --set always_yes true
   /opt/conda/bin/conda init bash
 fi
 EOF
