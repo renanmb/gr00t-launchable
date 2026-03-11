@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# setup-isaaclab_v4.sh (Bulletproof Edition)
+# setup-isaaclab_v5.sh (Bulletproof & Crontab-Safe Edition)
 
 # -----------------------------------------------------------------------------
 # Config
@@ -43,15 +43,20 @@ apt-get install -y --no-install-recommends git cmake build-essential
 # -----------------------------------------------------------------------------
 # Repo & Symlink setup
 # -----------------------------------------------------------------------------
+# --- NEW: Escape the /root directory so cron doesn't trap Git ---
+cd "$TARGET_HOME"
+
 if [[ ! -d "$ISAACLAB_DIR/.git" ]]; then
   echo "▶ Cloning IsaacLab repository"
-  sudo -u "$TARGET_USER" git clone https://github.com/isaac-sim/IsaacLab.git "$ISAACLAB_DIR"
+  # --- NEW: Added -H flag ---
+  sudo -H -u "$TARGET_USER" git clone https://github.com/isaac-sim/IsaacLab.git "$ISAACLAB_DIR"
 fi
 
 SYMLINK_PATH="$ISAACLAB_DIR/_isaac_sim"
 if [[ ! -L "$SYMLINK_PATH" ]]; then
   echo "▶ Creating _isaac_sim symlink"
-  sudo -u "$TARGET_USER" ln -s "$ISAACSIM_PATH" "$SYMLINK_PATH"
+  # --- NEW: Added -H flag ---
+  sudo -H -u "$TARGET_USER" ln -s "$ISAACSIM_PATH" "$SYMLINK_PATH"
 fi
 
 # -----------------------------------------------------------------------------
@@ -59,8 +64,12 @@ fi
 # -----------------------------------------------------------------------------
 echo "▶ Setting up Conda and installing Isaac Lab extensions"
 
-sudo -u "$TARGET_USER" bash <<EOF
+# --- NEW: Added -H flag to properly set $HOME for Conda ---
+sudo -H -u "$TARGET_USER" bash <<EOF
 set -euo pipefail
+
+# --- NEW: Escape the /root directory inside the subshell ---
+cd "$TARGET_HOME" 
 
 # 1. Load Conda
 source /opt/conda/etc/profile.d/conda.sh
