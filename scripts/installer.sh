@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# installer Version: 05 (Verification-Aware Edition)
+# installer Version: 06 (Isaaclab Installer Retries Edition)
 
 # --- Configuration ---
 # Dynamically find the repository directory, no matter where it was cloned
@@ -66,30 +66,41 @@ run_isaacsim() {
 run_isaaclab() {
     echo ">>> Starting Step 4: Isaac Lab Installation"
     
-    # 1. Run the script and check its exit code
-    if sudo bash "$BASE_DIR/setup-isaaclab.sh"; then
-        echo ">>> Performing final verification of Isaac Lab Conda Environment..."
+    local ATTEMPT=1
+    local MAX_ATTEMPTS=2
+
+    while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+        echo ">>> Installation Attempt $ATTEMPT of $MAX_ATTEMPTS..."
         
-        # 2. Hard Verification: Ask the environment to import torch
-        if sudo -H -u ubuntu /opt/conda/bin/conda run -n isaaclab python -c "import torch" >/dev/null 2>&1; then
-            echo "✅ Isaac Lab successfully verified!"
+        # 1. Run the script
+        if sudo bash "$BASE_DIR/setup-isaaclab.sh"; then
+            echo ">>> Performing final verification of Isaac Lab Conda Environment..."
             
-            # Only transition if verification passes
-            if [ "$INSTALL_OPTIONAL" = true ]; then
-                update_status "stage_gr00t"
-            else
-                update_status "completed"
+            # 2. Source conda and verify
+            if sudo -H -u ubuntu bash -c "source /opt/conda/etc/profile.d/conda.sh && conda run -n isaaclab python -c 'import torch'" >/dev/null 2>&1; then
+                echo "✅ Isaac Lab successfully verified!"
+                if [ "$INSTALL_OPTIONAL" = true ]; then
+                    update_status "stage_gr00t"
+                else
+                    update_status "completed"
+                fi
+                return 0
             fi
-        else
-            echo "❌ Verification Failed: Conda environment 'isaaclab' is missing or broken!"
-            echo "Halting master installer."
-            exit 1
         fi
-    else
-        echo "❌ setup-isaaclab.sh encountered a fatal error!"
-        echo "Halting master installer."
-        exit 1
-    fi
+
+        # If we reached here, the first attempt failed or verification failed
+        echo "⚠️ Attempt $ATTEMPT failed."
+        if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+            echo ">>> Sourcing Conda and retrying..."
+            # Force a refresh of the conda profile for the ubuntu user
+            sudo -H -u ubuntu bash -c "source /opt/conda/etc/profile.d/conda.sh && conda init bash" > /dev/null 2>&1
+            sleep 5
+        fi
+        ATTEMPT=$((ATTEMPT+1))
+    done
+
+    echo "❌ Step 4 Failed after $MAX_ATTEMPTS attempts. Halting."
+    exit 1
 }
 
 run_gr00t() {

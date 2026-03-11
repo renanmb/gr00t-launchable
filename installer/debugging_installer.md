@@ -338,6 +338,33 @@ sudo cat /var/log/cloud-init-output.log
 ```
 
 
+**Hypothesis: An API Payload Bug** (Most likely the issue)
+
+Looking at the user-data.txt you printed earlier, we saw the exact MIME multipart boundaries for always.sh, instance.sh, and once.sh. This proves Brev's infrastructure did try to use standard cloud-init to pass scripts to the VM.
+
+However, because the spaces between the boundaries were completely empty, the hypothesis here is that there is a bug in Brev's deployment API. When you clicked "Deploy," their backend generated the cloud-init "envelope" but failed to Base64-encode and inject your actual script text into the payload before sending the request to the underlying cloud provider (AWS/EC2).
+
+- Where it is: Nowhere on the VM. It exists only in Brev's web database, and the text was dropped during the handoff to the server.
+
+**Hypothesis: Container Entrypoint Injection** (There is no Container)
+
+Brev relies heavily on containerized environments (especially for their "Launchables"). Your instance might actually be running a Docker container on top of the Ubuntu host you SSH'd into. Brev might be passing your startup script as a docker run --entrypoint command or mounting it as a volume directly into a container, bypassing the host's cloud-init entirely.
+
+- Where to look: Check if your environment is containerized.
+
+- Try running: docker ps to see if there is a primary workspace container running, and docker inspect <container_id> to see if your script was passed in as an environment variable or entrypoint argument.
+
+
+The Cloud-Init is hanging up:
+
+- Failed to run module scripts_per_boot
+- Failed to run module scripts_per_instance
+
+```bash
+Cloud-init v. 25.3-0ubuntu1~22.04.1 running 'modules:config' at Wed, 11 Mar 2026 09:13:42 +0000. Up 23.07 seconds. Cloud-init v. 25.3-0ubuntu1~22.04.1 running 'modules:final' at Wed, 11 Mar 2026 09:13:54 +0000. Up 35.58 seconds. 2026-03-11 09:13:55,019 - cc_scripts_per_boot.py[WARNING]: Failed to run module scripts_per_boot (per-boot in /var/lib/cloud/scripts/per-boot) 2026-03-11 09:13:55,019 - log_util.py[WARNING]: Running module scripts_per_boot (<module 'cloudinit.config.cc_scripts_per_boot' from '/usr/lib/python3/dist-packages/cloudinit/config/cc_scripts_per_boot.py'>) failed 2026-03-11 09:13:55,028 - cc_scripts_per_instance.py[WARNING]: Failed to run module scripts_per_instance (per-instance in /var/lib/cloud/scripts/per-instance) 2026-03-11 09:13:55,028 - log_util.py[WARNING]: Running module scripts_per_instance (<module 'cloudinit.config.cc_scripts_per_instance' from '/usr/lib/python3/dist-packages/cloudinit/config/cc_scripts_per_instance.py'>) failed Cloud-init v. 25.3-0ubuntu1~22.04.1 finished at Wed, 11 Mar 2026 09:13:55 +0000. Datasource DataSourceEc2Local.
+```
+
+
 
 ## Error with the Installer
 
