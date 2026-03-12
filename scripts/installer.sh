@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# installer Version: 09 (using exec /bin/bash + simpler awk fix Edition)
+# installer Version: 10 (cd into IsaacLab to run torch)
 
 # --- Configuration ---
 # Dynamically find the repository directory, no matter where it was cloned
@@ -82,8 +82,8 @@ run_isaaclab() {
         if sudo SHELL=/bin/bash bash "$BASE_DIR/setup-isaaclab.sh"; then
             echo ">>> Performing final verification..."
             
-            # Verify using absolute path
-            if sudo -H -u ubuntu /opt/conda/bin/conda run -n isaaclab python -c "import torch" >/dev/null 2>&1; then
+            # --- Fix: Use a login shell and set the working directory ---
+            if sudo -i -u ubuntu bash -c "cd ~/IsaacLab && /opt/conda/bin/conda run -n isaaclab python -c 'import torch'"; then
                 echo "✅ Isaac Lab successfully verified!"
                 update_status "completed"
                 return 0

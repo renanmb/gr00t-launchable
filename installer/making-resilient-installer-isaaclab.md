@@ -158,3 +158,44 @@ run_isaaclab() {
     exit 1
 }
 ```
+
+
+SImpler version 10: it might need to cd into the repository in order to test it is installed
+
+```bash
+run_isaaclab() {
+    echo ">>> Starting Step 4: Isaac Lab Installation"
+    
+    local ATTEMPT=1
+    local MAX_ATTEMPTS=2
+
+    while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+        echo ">>> Installation Attempt $ATTEMPT of $MAX_ATTEMPTS..."
+        
+        # Explicitly pass SHELL to bypass the 'unknown' error
+        if sudo SHELL=/bin/bash bash "$BASE_DIR/setup-isaaclab.sh"; then
+            echo ">>> Performing final verification..."
+            
+            # --- Fix: Use a login shell and set the working directory ---
+            if sudo -i -u ubuntu bash -c "cd ~/IsaacLab && /opt/conda/bin/conda run -n isaaclab python -c 'import torch'"; then
+                echo "✅ Isaac Lab successfully verified!"
+                update_status "completed"
+                return 0
+            fi
+        fi
+
+        echo "⚠️ Attempt $ATTEMPT failed."
+        if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+            echo ">>> Refreshing shell initialization..."
+            sudo -H -u ubuntu bash -c "source /opt/conda/etc/profile.d/conda.sh && conda init bash" > /dev/null 2>&1
+            sleep 5
+        else
+            echo "❌ Max attempts reached. Relaunching installer to force fresh pass..."
+            sleep 2
+            # exec replaces the current process with a fresh shell instance
+            exec /bin/bash "$SCRIPT_PATH"
+        fi
+        ATTEMPT=$((ATTEMPT+1))
+    done
+}
+```
