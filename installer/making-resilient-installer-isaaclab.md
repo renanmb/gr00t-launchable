@@ -199,3 +199,21 @@ run_isaaclab() {
     done
 }
 ```
+
+
+## Error everything installs and passes but fails
+
+```bash
+(base) ubuntu@brev-dpo7w313b:~$ if sudo -i -u ubuntu bash -c "cd ~/IsaacLab && /opt/conda/bin/conda run -n isaaclab python -c 'import torch'"; then
+                echo "✅ Isaac Lab successfully verified!"
+            fi                           
+✅ Isaac Lab successfully verified!
+(base) ubuntu@brev-dpo7w313b:~$ conda activate isaaclab
+(isaaclab) ubuntu@brev-dpo7w313b:~$ cd IsaacLab/
+(isaaclab) ubuntu@brev-dpo7w313b:~/IsaacLab$ isaaclab -p scripts/reinforcement_learning/rsl_rl/train.py --task=Isaac-Ant-v0 --headless
+[INFO] Using python from: /opt/conda/envs/isaaclab/bin/python                                                                                  
+Traceback (most recent call last):
+  File "/home/ubuntu/IsaacLab/scripts/reinforcement_learning/rsl_rl/train.py", line 13, in <module>
+    from isaaclab.app import AppLauncher
+ModuleNotFoundError: No module named 'isaaclab'
+```

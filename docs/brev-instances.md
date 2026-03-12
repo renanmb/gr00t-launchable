@@ -138,3 +138,24 @@ pip --version
 Output:
 
 pip 25.3 from /usr/local/lib/python3.10/dist-packages/pip (python 3.10)
+
+
+AWS AMI information
+
+```bash
+=============================================================================
+AMI Name: Deep Learning Base OSS Nvidia Driver GPU AMI (Ubuntu 22.04) 
+Supported EC2 instances: G4dn, G5, G6, Gr6, G6e, G7e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
+NVIDIA driver version: 580.126.09
+CUDA versions available: cuda-12.6 cuda-12.8 cuda-12.9 cuda-13.0
+Default CUDA version is 12.9
+
+Scripts to setup SageMaker HyperPod are in /opt/aws/dlami/sagemaker_hyperpod
+
+Release notes: https://docs.aws.amazon.com/dlami/latest/devguide/appendix-ami-release-notes.html
+AWS Deep Learning AMI Homepage: https://aws.amazon.com/machine-learning/amis/
+Developer Guide and Release Notes: https://docs.aws.amazon.com/dlami/latest/devguide/what-is-dlami.html
+Support: https://forums.aws.amazon.com/forum.jspa?forumID=263
+For a fully managed experience, check out Amazon SageMaker at https://aws.amazon.com/sagemaker
+=============================================================================
+```

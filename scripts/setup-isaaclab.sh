@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# setup-isaaclab_v7.sh (Fixed post installation infinite loop)
+# setup-isaaclab_v8.sh (Using conda specific python for the isaaclab -i step)
 
 # --- Configuration ---
 TARGET_USER="ubuntu"
@@ -78,7 +78,8 @@ fi
 
 # 5. Build extensions
 echo "▶ Building extensions (This may take 10+ minutes)..."
-./isaaclab.sh -i
+# Force the use of the conda-specific python for the install
+conda run -n "$CONDA_ENV_NAME" ./isaaclab.sh -i
 
 # 6. Post-Installation Health Check
 echo "▶ Running Post-Install Verification..."
