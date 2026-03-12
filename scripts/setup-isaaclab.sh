@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# setup-isaaclab_v6.sh (Fixed AWK & Environment Detection)
+# setup-isaaclab_v7.sh (Fixed post installation infinite loop)
 
 # --- Configuration ---
 TARGET_USER="ubuntu"
@@ -82,10 +82,13 @@ echo "▶ Building extensions (This may take 10+ minutes)..."
 
 # 6. Post-Installation Health Check
 echo "▶ Running Post-Install Verification..."
-if python -c "import torch; print('PyTorch Version:', torch.__version__)" &>/dev/null; then
-    echo "✅ Verification Passed: PyTorch is successfully installed."
+# Use conda run to ensure we are actually hitting the environment we just built
+if conda run -n "$CONDA_ENV_NAME" python -c "import torch; print('PyTorch Version:', torch.__version__)" &>/dev/null; then
+    echo "✅ Verification Passed: PyTorch is successfully installed in $CONDA_ENV_NAME."
 else
-    echo "❌ Verification Failed: Python environment is broken."
+    echo "❌ Verification Failed: torch not found in environment '$CONDA_ENV_NAME'."
+    # Debug: show where python is pointing
+    conda run -n "$CONDA_ENV_NAME" which python
     exit 1
 fi
 EOF
