@@ -12,6 +12,9 @@ cat /var/log/install_progress.log
 
 # Rewind the progress bookmark back to Conda
 echo "stage_conda" | sudo tee /var/log/install_progress.log
+
+# check if stuck
+ps aux | grep installer.sh
 ```
 
 ## Brev Launch Script
