@@ -17,6 +17,12 @@ echo "stage_conda" | sudo tee /var/log/install_progress.log
 ps aux | grep installer.sh
 ```
 
+54.173.177.49
+
+http://<instance-public-ip>:6080/vnc.html
+
+http://54.173.177.49:6080/vnc.html
+
 ## Brev Launch Script
 
 **Method 1: The HTTPS Token Method**
