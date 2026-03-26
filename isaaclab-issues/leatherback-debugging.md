@@ -100,7 +100,7 @@ Critic MLP: MLP(
 
 ## Error with the Play script
 
-Somehow it is parsionggthe script wringly
+Somehow it is parsig the script wrongly
 
 ```bash
 [13.472s] Simulation App Startup Complete
