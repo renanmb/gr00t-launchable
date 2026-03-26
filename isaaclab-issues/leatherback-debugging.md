@@ -124,3 +124,97 @@ Traceback (most recent call last):
     raise error.NameNotFound(
 gymnasium.error.NameNotFound: Environment `Template-Leatherback-Direct` doesn't exist.
 ```
+
+## Rolling Back IsaacLab
+
+IsaacLab v2.3.2 has several issues
+
+[[Bug Report] flatdict can't be install for python3.11 because lack of pkg_resources in setuptools #4577](https://github.com/isaac-sim/IsaacLab/issues/4577)
+
+Metnions that must fix some packages since the project has removed:
+
+maybe this error is caused by the change of setuptools, they removed pkg_resources yesterday
+
+```bash
+pip install pip==23
+pip install setuptools==65
+pip install flatdict
+./isaaclab.sh --install
+```
+
+There are further changes in the project like flatdict 
+
+
+Always remember the USD assets and some stuff need to get Git LFS pull
+
+```bash
+git lfs fetch --all
+git lfs pull
+git lfs checkout
+```
+
+
+## Verifying multiple versions in Bash
+
+```bash
+# 1. Get the current version string (e.g., v2.3.2)
+CURRENT_GIT_VER=$(git describe --tags --abbrev=0 2>/dev/null || git rev-parse --abbrev-ref HEAD)
+
+# 2. Use 'sort -V' to check if CURRENT_GIT_VER is less than or equal to v2.3.2
+# This returns true (exit code 0) if CURRENT_GIT_VER is <= v2.3.2
+if [ "$(printf '%s\n%s' "v2.3.2" "$CURRENT_GIT_VER" | sort -V | head -n1)" == "$CURRENT_GIT_VER" ]; then
+  echo "▶ Version $CURRENT_GIT_VER detected (v2.3.2 or lower). Applying legacy patches..."
+  conda run -n "$CONDA_ENV_NAME" python -m pip install pip==23.3.2
+  conda run -n "$CONDA_ENV_NAME" python -m pip install setuptools==65.5.0
+  conda run -n "$CONDA_ENV_NAME" python -m pip install flatdict
+else
+  echo "▶ Version $CURRENT_GIT_VER is newer than v2.3.2. Skipping legacy patches."
+fi
+```
+
+
+## Leatherback Installation Verification
+
+The solution might be to use the built in tools in IsaacLab to test the installations
+
+```bash
+export TARGET_USER="ubuntu"
+export CONDA_ENV_NAME="isaaclab"
+export LEATHERBACK_DIR="/home/ubuntu/goat_racer_test/leatherback"
+export TASK_NAME="Template-Leatherback-Direct-v0"
+
+echo "▶ Verifying environment registration..."
+
+# 1. Run the list_envs script
+# 2. Grep for your specific task name
+# 3. If grep finds it, it returns exit code 0 (success)
+if sudo -H -u "$TARGET_USER" -i bash -c "conda run -n $CONDA_ENV_NAME python '$LEATHERBACK_DIR/scripts/list_envs.py'" | grep "Template-Leatherback-Direct-v0"; then
+    echo "✅ Success: 'Template-Leatherback-Direct-v0' is registered and visible!"
+else
+    echo "❌ Failure: Environment 'Template-Leatherback-Direct-v0' not found in the list."
+    echo "Available environments were:"
+    sudo -H -u "$TARGET_USER" -i bash -c "conda run -n $CONDA_ENV_NAME python '$LEATHERBACK_DIR/scripts/list_envs.py'"
+    # exit 1
+fi
+```
+
+I dont think piping and using grep will work
+
+```bash
+grep -q "$TASK_NAME"
+
+```
+
+Try storing the output:
+
+```bash
+# Store the output to check and display
+OUTPUT=$(sudo -H -u "$TARGET_USER" -i bash -c "conda run -n $CONDA_ENV_NAME --cwd '$LEATHERBACK_DIR' python scripts/list_envs.py")
+
+if echo "$OUTPUT" | grep "$TASK_NAME"; then
+    echo "✅ Found $TASK_NAME"
+else
+    echo "❌ Task missing from registration table!"
+    # exit 1
+fi
+```
