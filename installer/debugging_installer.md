@@ -546,3 +546,66 @@ awk: cmd. line:1: {print \$1}
 awk: cmd. line:1:        ^ syntax error
 Exception ignored on flushing sys.stdout:
 ```
+
+## Method 3
+
+Use the deploy key from script inside, this will not work with Brev Launchables. However using the brev cli entirely it is possible to scp the necessary scriptst to download the necessary repositories and provision the machine.
+
+for example, we could adapt the Method 2 into an standalone script:
+
+```bash
+mkdir -p /root/.ssh
+cat << 'EOF' > /root/.ssh/deploy_key
+-----BEGIN OPENSSH PRIVATE KEY-----
+(PASTE YOUR PRIVATE KEY HERE)
+-----END OPENSSH PRIVATE KEY-----
+EOF
+
+echo "Setting permissions..."
+chmod 600 /root/.ssh/deploy_key
+
+echo "Attempting to clone repository..."
+
+GIT_SSH_COMMAND="ssh -i /root/.ssh/deploy_key -o StrictHostKeyChecking=no -o IdentitiesOnly=yes" \
+  git clone git@github.com:ORG/REPO.git /home/ubuntu/my-repo
+
+echo "Cleaning up key..."
+rm -f /root/.ssh/deploy_key
+
+echo "Fixing ownership..."
+chown -R ubuntu:ubuntu /home/ubuntu/my-repo
+
+echo "Triggering installer..."
+sudo bash /home/ubuntu/my-repo/brev-launchable-scripts/installer.sh >> /var/log/install_output.log 2>&1 &
+
+echo "--- SCRIPT FINISHED ---"
+```
+
+## Brev Networking Challenges
+
+Since Brev is not the same as dealing with the Cloud Provider there are several challenges, for one we dont have access to Load Balancer, SSM or similar tools, static ips and much more ...
+
+So overcoming Networking challenges we can try a few things:
+
+We can use the Brev Tunnel feature throught the API
+
+```bash
+# port forward for the jupyter notebook
+brev port-forward <INSTANCE_NAME> --port 8000:8000
+```
+
+We can try to expose through Brev console using in the Access Section the "Using Secure Links" or "Using Tunnels" to expose the ports.
+
+Brev will make a shareable Link, this is what is recommended to do the JupyterNotebooks generally.
+
+
+We can use Cloudflare tunnel in conjunction with something like Tailscale.
+
+The challenge with Cloudflare tunnel is that it needs to find the instance and Brev does not provide static ip.
+
+
+Using Launchable is a limitation due the lack of support to private repos and the cloud-init limitatons
+
+So an easy alternative is to just use the Brev CLI. (The challenge is automating since the handshake in the CLI is bad but it might imrpove over time)
+
+For example: add the machine to tailscale vpn using a script, then tunnel it through an auth layer can be a load balancer, cloudflare or other alternative. 
